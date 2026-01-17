@@ -1,83 +1,5 @@
-<!doctype html>
-<html lang="en-US">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<!-- Dynamic SEO Meta Tags (will be updated via JS) -->
-		<title>Product | CozySpot</title>
-		<meta name="description" content="Premium workspace products for your perfect setup." />
-		<meta name="robots" content="index, follow" />
-		<link rel="canonical" href="" id="canonical-url" />
-
-		<!-- Open Graph -->
-		<meta property="og:type" content="product" />
-		<meta property="og:title" content="" id="og-title" />
-		<meta property="og:description" content="" id="og-description" />
-		<meta property="og:image" content="" id="og-image" />
-		<meta property="og:url" content="" id="og-url" />
-		<meta property="product:price:amount" content="" id="og-price" />
-		<meta property="product:price:currency" content="EUR" id="og-currency" />
-
-		<script src="https://cdn.tailwindcss.com"></script>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
-		<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-
-		<!-- JSON-LD Structured Data (will be populated via JS) -->
-		<script type="application/ld+json" id="product-jsonld">
-			{
-				"@context": "https://schema.org/",
-				"@type": "Product",
-				"name": "",
-				"image": [],
-				"description": "",
-				"sku": "",
-				"brand": {
-					"@type": "Brand",
-					"name": "CozySpot"
-				},
-				"offers": {
-					"@type": "Offer",
-					"priceCurrency": "EUR",
-					"price": "",
-					"availability": "https://schema.org/InStock",
-					"itemCondition": "https://schema.org/NewCondition"
-				}
-			}
-		</script>
-	</head>
-	<body class="antialiased">
-		<div id="navbar-container"></div>
-
-		<div id="ambient-bg">
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-		</div>
-
-		<div id="scroll-progress"></div>
-
-		<div class="mt-16 corner-widget top-left hidden lg:block">
-			<div id="live-clock">00:00:00</div>
-			<div>System: Active</div>
-		</div>
-
-		<div class="corner-widget bottom-left hidden lg:block">
-			<div>Scroll to exploration</div>
-			<div class="mt-2 w-10 h-[1px] bg-white/20 overflow-hidden">
-				<div class="w-full h-full bg-white animate-[slide_2s_infinite]"></div>
-			</div>
-		</div>
-
-		<div class="corner-widget bottom-right hidden lg:block text-right">
-			<div id="mouse-coords">X: 000 // Y: 000</div>
-			<div>CozySpot Interface v.3.2</div>
-		</div>
-
-		<!-- Main Product Section -->
-		<main class="pt-24 pb-20 min-h-screen">
+<main class="pt-24 pb-20 min-h-screen">
 			<!-- Breadcrumbs -->
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
 				<nav class="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
@@ -584,7 +506,7 @@
 		<!-- Cart Drawer (included from cart.html) -->
 		<div id="cart-container"></div>
 
-		<script src="script.js"></script>
+
 		<script>
 			// Load Navigation
 			fetch('navigation.html')
@@ -610,21 +532,11 @@
 				})
 				.catch(err => console.error('Failed to load footer:', err))
 
-			// Load cart component
-			fetch('cart.html')
-				.then(res => res.text())
-				.then(html => {
-					document.getElementById('cart-container').innerHTML = html
-					// Re-initialize Cart after DOM is ready
-					if (typeof Cart !== 'undefined' && Cart.init) {
-						Cart.init()
-					}
-				})
-
-			// Initialize product page when data is loaded
-			document.addEventListener('DOMContentLoaded', () => {
-				initProductPage()
-			})
-		</script>
-	</body>
-</html>
+{% schema %}
+{
+  "name": "Product",
+  "settings": [],
+  "blocks": [],
+  "presets": [ { "name": "Product", "category": "Pages" } ]
+}
+{% endschema %}

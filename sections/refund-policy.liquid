@@ -1,30 +1,4 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Refund Policy - CozySpot</title>
-		<script src="https://cdn.tailwindcss.com"></script>
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-
-	</head>
-	<body class="bg-black text-white font-['Inter'] antialiased">
-		<!-- Navigation -->
-		<div id="navigation-container"></div>
-
-		<div id="ambient-bg">
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-		</div>
-
-		<div id="scroll-progress"></div>
-
-		<!-- Main Content -->
-		<main class="min-h-screen pt-24 pb-20">
-			<div class="max-w-4xl mx-auto px-6 lg:px-10">
+<!-- Refund Policy section content (Shopify section fragment) -->
 				<!-- Header -->
 				<div class="mb-12">
 					<h1 class="text-4xl md:text-5xl font-black uppercase italic mb-4">Refund Policy</h1>
@@ -175,23 +149,11 @@
 			</div>
 		</main>
 
-		<!-- Footer -->
-		<div id="footer-container"></div>
-
-		<script src="script.js"></script>
-		<script>
-			fetch('navigation.html')
-				.then(res => res.text())
-				.then(html => {
-					document.getElementById('navigation-container').innerHTML = html
-					if (typeof runMenuScripts === 'function') runMenuScripts()
-				})
-
-			fetch('footer.html')
-				.then(res => res.text())
-				.then(html => {
-					document.getElementById('footer-container').innerHTML = html
-				})
-		</script>
-	</body>
-</html>
+{% schema %}
+{
+  "name": "Refund Policy",
+  "settings": [],
+  "blocks": [],
+  "presets": [ { "name": "Refund Policy", "category": "Pages" } ]
+}
+{% endschema %}

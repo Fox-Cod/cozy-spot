@@ -9,20 +9,20 @@
 			<div class="grid grid-cols-2 md:grid-cols-3 gap-12">
 				<div class="flex flex-col gap-4">
 					<span class="text-[10px] font-black uppercase text-white/30 tracking-[0.3em]">Explore</span>
-					<a href="showcase.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Showroom</a>
-					<a href="collections.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Collections</a>
-					<a href="about.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">About Us</a>
+					<a href="{{ pages['showcase'].url | default: '/pages/showcase' }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Showroom</a>
+					<a href="{{ routes.collections_url }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Collections</a>
+					<a href="{{ pages['about-us'].url | default: '/pages/about-us' }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">About Us</a>
 				</div>
 				<div class="flex flex-col gap-4">
 					<span class="text-[10px] font-black uppercase text-white/30 tracking-[0.3em]">Support</span>
-					<a href="shipping-policy.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Shipping</a>
-					<a href="refund-policy.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Returns</a>
-					<a href="contacts.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Contact</a>
+					<a href="{{ pages['shipping-policy'].url | default: '/pages/shipping-policy' }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Shipping</a>
+					<a href="{{ pages['refund-policy'].url | default: '/pages/refund-policy' }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Returns</a>
+					<a href="{{ pages['contacts'].url | default: '/pages/contacts' }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Contact</a>
 				</div>
 				<div class="flex flex-col gap-4">
 					<span class="text-[10px] font-black uppercase text-white/30 tracking-[0.3em]">Legal</span>
-					<a href="privacy-policy.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Privacy</a>
-					<a href="terms-of-service.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Terms</a>
+					<a href="{{ pages['privacy-policy'].url | default: '/pages/privacy-policy' }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Privacy</a>
+					<a href="{{ pages['terms-of-service'].url | default: '/pages/terms-of-service' }}" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Terms</a>
 				</div>
 			</div>
 		</div>
@@ -49,3 +49,12 @@
 		</div>
 	</div>
 </footer>
+
+{% schema %}
+{
+	"name": "Footer",
+	"settings": [],
+	"blocks": [],
+	"presets": [{ "name": "Footer", "category": "Footer" }]
+}
+{% endschema %}

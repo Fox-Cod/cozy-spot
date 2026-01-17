@@ -1,13 +1,11 @@
 {
-  "type": "navigation",
-  "name": "t:general.navigation",
-  "sections": {
-    "navigation": {
-      "type": "navigation",
-      "settings": {}
-    }
-  },
-  "order": [
-    "navigation"
-  ]
+	"type": "header",
+	"name": "t:general.header",
+	"sections": {
+		"navigation": {
+			"type": "navigation",
+			"settings": {}
+		}
+	},
+	"order": ["navigation"]
 }

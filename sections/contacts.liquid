@@ -1,43 +1,4 @@
-<!doctype html>
-<html lang="ru-RU">
-	<!doctype html>
-	<html lang="en-US">
-		<head>
-			<meta charset="utf-8" />
-			<meta name="viewport" content="width=device-width, initial-scale=1" />
-			<title>CozySpot — Contact</title>
-			<script src="https://cdn.tailwindcss.com"></script>
-			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
-
-		</head>
-		<body class="bg-[#050505] text-white">
-			<!-- Navigation -->
-			<div id="navbar-container"></div>
-
-            <div id="ambient-bg">
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-		</div>
-
-		<div id="scroll-progress"></div>
-
-		<div class="mt-16 corner-widget top-left hidden lg:block">
-			<div id="live-clock">00:00:00</div>
-			<div>System: Active</div>
-		</div>
-
-		<div class="corner-widget bottom-left hidden lg:block">
-			<div>Scroll to exploration</div>
-			<div class="mt-2 w-10 h-[1px] bg-white/20 overflow-hidden">
-				<div class="w-full h-full bg-white animate-[slide_2s_infinite]"></div>
-			</div>
-		</div>
-
-		<div class="corner-widget bottom-right hidden lg:block text-right">
-			<div id="mouse-coords">X: 000 // Y: 000</div>
-			<div>CozySpot Interface v.3.2</div>
-		</div>
+<!-- Contacts section content (Shopify section fragment) -->
 
 			<main class="max-w-4xl mx-auto px-6 py-24">
 				<header class="text-center mb-12">
@@ -92,23 +53,13 @@
 				</section>
 			</main>
 
-			<!-- Footer -->
-			<div id="footer-container"></div>
-
-			<script>
-				// Load Navigation
-				fetch('navigation.html')
-					.then(r => r.text())
-					.then(html => { document.getElementById('navbar-container').innerHTML = html })
-					.catch(()=>{})
-
-				// Load Footer
-				fetch('footer.html')
-					.then(r => r.text())
-					.then(html => { document.getElementById('footer-container').innerHTML = html })
-					.catch(()=>{})
-			</script>
-		</body>
-	</html>
-	</body>
-</html>
+{% schema %}
+{
+	"name": "Contacts",
+	"settings": [],
+	"blocks": [],
+	"presets": [
+		{ "name": "Contacts", "category": "Pages" }
+	]
+}
+{% endschema %}

@@ -20,19 +20,38 @@
     {% # Load and preload the critical CSS %}
     {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     {{ 'style.css' | asset_url | stylesheet_tag }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
+
+    <script>
+      window.CozySpot = window.CozySpot || {};
+      window.CozySpot.dataUrl = "{{ 'data.json' | asset_url }}";
+      window.CozySpot.fallbackImage = "{{ 'min-01.jpg' | asset_url }}";
+      window.CozySpot.assetBase = "{{ 'min-01.jpg' | asset_url | split: 'min-01.jpg' | first }}";
+      window.CozySpot.routes = {
+        root: "{{ routes.root_url }}",
+        collections: "{{ routes.collections_url }}",
+        productBase: "/products",
+        showcase: "{{ pages['showcase'].url | default: '/pages/showcase' }}"
+      };
+    </script>
 
     {{ content_for_header }}
   </head>
 
   <body>
-    {% sections 'header-group' %}
+    {% sections 'navigation-group' %}
 
     {{ content_for_layout }}
 
     {% sections 'footer-group' %}
+    {% section 'cart' %}
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    {{ 'script.js' | asset_url | script_tag }}
   </body>
 </html>

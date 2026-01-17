@@ -10,6 +10,55 @@
 
 console.log('script.js loaded')
 
+/* -------------------- Theme Config -------------------- */
+const CozySpotConfig = window.CozySpot || {}
+const CozySpotRoutes = CozySpotConfig.routes || {}
+const dataUrl = CozySpotConfig.dataUrl || 'data.json'
+const fallbackImage = CozySpotConfig.fallbackImage || ''
+const assetBase = CozySpotConfig.assetBase || ''
+const getCollectionsUrl = () => CozySpotRoutes.collections || '/collections'
+const getShowcaseUrl = () => CozySpotRoutes.showcase || '#showcase'
+const getProductUrl = handle => {
+	if (!handle) return '#'
+	const base = (CozySpotRoutes.productBase || '/products').replace(/\/$/, '')
+	return `${base}/${handle}`
+}
+
+const resolveAssetImage = value => {
+	if (!value) return fallbackImage
+	if (
+		value.startsWith('http://') ||
+		value.startsWith('https://') ||
+		value.startsWith('//') ||
+		value.startsWith('/') ||
+		value.startsWith('data:')
+	) {
+		return value
+	}
+	return assetBase ? `${assetBase}${value}` : value
+}
+
+const normalizeDataImages = data => {
+	if (!data || typeof data !== 'object') return data
+	const fix = obj => {
+		if (!obj || typeof obj !== 'object') return
+		if (typeof obj.image === 'string')
+			obj.image = resolveAssetImage(obj.image)
+		if (typeof obj.img === 'string') obj.img = resolveAssetImage(obj.img)
+		if (Array.isArray(obj.images)) {
+			obj.images = obj.images.map(img => resolveAssetImage(img))
+		}
+		if (Array.isArray(obj.products)) obj.products.forEach(p => fix(p))
+		if (Array.isArray(obj.hotspots)) obj.hotspots.forEach(h => fix(h))
+		Object.keys(obj).forEach(key => {
+			const val = obj[key]
+			if (val && typeof val === 'object') fix(val)
+		})
+	}
+	fix(data)
+	return data
+}
+
 /* -------------------- Background Engine -------------------- */
 ;(function BackgroundEngine() {
 	// Nothing heavy to init here for now; ambient background shapes are CSS-driven.
@@ -171,7 +220,7 @@ async function fetchShopifyProduct(handle) {
 		if (!response.ok)
 			throw new Error(`Shopify API error: ${response.status}`)
 
-		const data = await response.json()
+		const data = normalizeDataImages(await response.json())
 		const product = data?.data?.product
 
 		if (product) {
@@ -434,7 +483,7 @@ function renderProductCard(product, index) {
 	let buttonHtml = ''
 	const moreDetailsLink = `
 		<a 
-			href="product.html?handle=${product.shopify_handle}"
+			href="${getProductUrl(product.shopify_handle)}"
 			class="block text-center mt-3 text-[10px] uppercase tracking-widest text-purple-400 hover:text-purple-300 transition-colors"
 		>
 			More details →
@@ -579,10 +628,17 @@ function handleAddToCart(handle, buttonEl) {
 /* -------------------- Data Loading -------------------- */
 let rooms = []
 async function loadData() {
+	const hasTargets =
+		document.getElementById('main-wrapper') ||
+		document.getElementById('demo-preview-wrapper') ||
+		document.getElementById('assortment-grid') ||
+		document.getElementById('dynamic-collection-grid') ||
+		document.getElementById('global-viewer')
+	if (!hasTargets || !dataUrl) return
 	try {
-		const res = await fetch('data.json')
+		const res = await fetch(dataUrl)
 		if (!res.ok) throw new Error(res.statusText)
-		const json = await res.json()
+		const json = normalizeDataImages(await res.json())
 
 		// Сохраняем конфиг Shopify
 		shopifyConfig = json.shopify_config || null
@@ -688,7 +744,7 @@ function renderCollection() {
 											)
 											.join('')}
 
-						             <a href="/gallery.html" class="group relative reveal reveal-right overflow-hidden rounded-[1.5rem] bg-zinc-900 border border-white/5 cursor-pointer">
+									 <a href="${getShowcaseUrl()}" class="group relative reveal reveal-right overflow-hidden rounded-[1.5rem] bg-zinc-900 border border-white/5 cursor-pointer">
 						                 <div class="aspect-square lg:aspect-[16/7] relative overflow-hidden">
 						                     <img src="${
 													blurryRoom.image
@@ -720,7 +776,7 @@ function renderCollection() {
 						             <span class="text-[8px] text-white/30 uppercase tracking-[0.4em] mt-2 font-bold">Unique Items</span>
 						         </div>
 						         <div class="flex flex-col items-center justify-center py-8">
-						             <a href="/gallery.html" class="flex flex-col items-center group">
+									 <a href="${getShowcaseUrl()}" class="flex flex-col items-center group">
 						                 <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black group-hover:bg-purple-500 group-hover:text-white transition-all">
 						                     <span class="text-sm">↗</span>
 						                 </div>
@@ -1802,7 +1858,7 @@ function openSheet(roomIdxOrSpot, spotIdx) {
 					? `<a href="${link}" target="_blank" class="w-full inline-flex items-center justify-center bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 hover:text-white transition-all shadow-xl">Learn more</a>`
 					: `<button class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest opacity-60 cursor-not-allowed" disabled>Coming soon</button>`
 		}
-		<a href="product.html?handle=${spot.shopify_handle || spot.id || 'test-product-lamp'}" class="block text-center text-purple-500 hover:text-purple-400 text-[11px] font-bold uppercase tracking-widest py-2 transition-colors">More details →</a>
+		<a href="${getProductUrl(spot.shopify_handle || spot.id)}" class="block text-center text-purple-500 hover:text-purple-400 text-[11px] font-bold uppercase tracking-widest py-2 transition-colors">More details →</a>
     </div>
   </div>
 `
@@ -1863,6 +1919,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
 	loadData()
 	runReveal() // expose common globals used by inline attributes
+	if (document.getElementById('cart-drawer')) Cart.init()
 	window.openRoomViewer = openRoomViewer
 	window.closeViewer = closeViewer
 	window.nextViewerRoom = nextViewerRoom
@@ -1886,7 +1943,7 @@ window.addToCartFromSheet = function (handle, title, price, image) {
 		id: handle || Date.now().toString(),
 		title: title || 'Unknown Item',
 		price: parseFloat(price) || 0,
-		image: image || 'gallery/placeholder.jpg',
+		image: image || fallbackImage,
 		handle: handle,
 	}
 
@@ -2221,6 +2278,7 @@ const Cart = (function () {
 	// State
 	let items = []
 	let isOpen = false
+	let initialized = false
 	const FREE_SHIPPING_THRESHOLD = 500
 	let autoCloseTimer = null
 
@@ -2237,6 +2295,8 @@ const Cart = (function () {
 	})
 
 	function init() {
+		if (initialized) return
+		initialized = true
 		const els = getElements()
 		// Event Listeners
 		if (els.closeBtn) els.closeBtn.addEventListener('click', close)
@@ -2353,7 +2413,7 @@ const Cart = (function () {
                 <div class='flex flex-col items-center justify-center h-full text-white/30 space-y-4'>
                     <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'></circle><circle cx='20' cy='21' r='1'></circle><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'></path></svg>
                     <p class='text-[10px] uppercase tracking-widest'>Your cart is empty</p>
-					<a href="collections.html" class="bg-white text-black p-4 lg:py-3 rounded-lg font-black uppercase text-[8px] lg:text-[9px] tracking-[0.2em] text-center hover:bg-purple-600 hover:text-white transition-all duration-300">
+					<a href="${getCollectionsUrl()}" class="bg-white text-black p-4 lg:py-3 rounded-lg font-black uppercase text-[8px] lg:text-[9px] tracking-[0.2em] text-center hover:bg-purple-600 hover:text-white transition-all duration-300">
 								View the collection
 							</a>
                 </div>`
@@ -2364,7 +2424,7 @@ const Cart = (function () {
                 <div class='flex gap-4 animate-[fadeIn_0.3s_ease-out] mb-6'>
                     <div class='w-20 h-20 bg-white/5 rounded-lg overflow-hidden flex-shrink-0'>
                         <img src='${
-							item.image || 'gallery/placeholder.jpg'
+							item.image || fallbackImage
 						}' class='w-full h-full object-cover' />
                     </div>
                     <div class='flex-1 flex flex-col justify-between py-1'>
@@ -2509,7 +2569,7 @@ window.addToCart = async function (productIdOrHandle, buttonEl) {
 				(titleEl ? titleEl.innerText : Date.now().toString()),
 			title: titleEl ? titleEl.innerText : 'Unknown Item',
 			price: priceEl ? parseFloat(priceEl.dataset.price) || 0 : 0,
-			image: imgEl ? imgEl.src : 'gallery/placeholder.jpg',
+			image: imgEl ? imgEl.src : fallbackImage,
 			handle: productIdOrHandle,
 		}
 	} else if (card) {
@@ -2534,7 +2594,7 @@ window.addToCart = async function (productIdOrHandle, buttonEl) {
 				(titleEl ? titleEl.innerText : Date.now().toString()),
 			title: titleEl ? titleEl.innerText : 'Unknown Item',
 			price: price,
-			image: imgEl ? imgEl.src : 'gallery/placeholder.jpg',
+			image: imgEl ? imgEl.src : fallbackImage,
 			handle: productIdOrHandle,
 		}
 	} else if (productIdOrHandle && productCache.has(productIdOrHandle)) {
@@ -2544,8 +2604,7 @@ window.addToCart = async function (productIdOrHandle, buttonEl) {
 			id: productIdOrHandle,
 			title: cached.title || cached.product_name || 'Unknown Item',
 			price: cached.price || 0,
-			image:
-				cached.img || cached.images?.[0] || 'gallery/placeholder.jpg',
+			image: cached.img || cached.images?.[0] || fallbackImage,
 			handle: productIdOrHandle,
 			variantId: cached.variantId,
 		}
@@ -2564,7 +2623,7 @@ window.addToCart = async function (productIdOrHandle, buttonEl) {
 					image:
 						shopifyData.img ||
 						shopifyData.images?.[0] ||
-						'gallery/placeholder.jpg',
+						fallbackImage,
 					handle: productIdOrHandle,
 					variantId: shopifyData.variantId,
 				}
@@ -2707,8 +2766,7 @@ function pulseBadge() {
 	}
 }
 
-// Cart.init() is now called after cart.html is loaded
-// See: fetch('cart.html') in index.html and showcase.html
+// Cart.init() runs automatically when cart drawer exists on the page
 /* -------------------- Product Detail Page (PDP) Module -------------------- */
 ;(function ProductDetailPage() {
 	// State
@@ -2739,7 +2797,11 @@ function pulseBadge() {
 
 		try {
 			// Load data.json
-			const response = await fetch('data.json')
+			if (!dataUrl) {
+				showErrorState('Data source not configured')
+				return
+			}
+			const response = await fetch(dataUrl)
 			const data = await response.json()
 
 			// Store shopify config
@@ -3093,8 +3155,10 @@ function pulseBadge() {
 		const lightboxWrapper = document.getElementById('lightbox-images')
 
 		if (!images.length) {
-			images = ['gallery/min-01.jpg'] // Default image
+			images = [fallbackImage] // Default image
 		}
+
+		images = images.map(img => resolveAssetImage(img))
 
 		// Main images
 		if (mainWrapper) {
@@ -3436,9 +3500,9 @@ function pulseBadge() {
 				const fb = p.fallback
 				return `
 				<div class="swiper-slide">
-					<a href="product.html?handle=${p.shopify_handle}" class="block group">
+					<a href="${getProductUrl(p.shopify_handle)}" class="block group">
 						<div class="aspect-square rounded-2xl overflow-hidden bg-[#0a0a0a] border border-white/5 mb-4">
-							<img src="${fb.image || 'gallery/min-01.jpg'}" alt="${fb.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+							<img src="${resolveAssetImage(fb.image)}" alt="${fb.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 						</div>
 						<span class="text-[10px] uppercase tracking-widest text-white/40">${fb.category || 'Product'}</span>
 						<h3 class="font-bold text-lg mt-1 group-hover:text-purple-400 transition-colors">${fb.title}</h3>
@@ -3471,7 +3535,7 @@ function pulseBadge() {
 			.map(
 				scene => `
 			<div class="swiper-slide">
-				<a href="showcase.html#${scene.id}" class="block group relative aspect-video rounded-2xl overflow-hidden">
+				<a href="${getShowcaseUrl()}#${scene.id}" class="block group relative aspect-video rounded-2xl overflow-hidden">
 					<img src="${scene.image}" alt="${scene.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 					<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
 						<span class="text-[10px] uppercase tracking-widest text-purple-400">${scene.category}</span>
@@ -3743,7 +3807,9 @@ function pulseBadge() {
 			title: currentProduct.title,
 			price: selectedVariant?.price || currentProduct.price,
 			currency: currentProduct.currency,
-			image: currentProduct.images?.[0] || 'gallery/min-01.jpg',
+			image: resolveAssetImage(
+				currentProduct.images?.[0] || fallbackImage,
+			),
 			variantId: selectedVariant?.id,
 			variantTitle: selectedVariant?.title,
 			quantity: quantity,

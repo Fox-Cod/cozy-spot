@@ -1,43 +1,4 @@
-<!doctype html>
-<html lang="en-US">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>CozySpot | Collections</title>
-		<script src="https://cdn.tailwindcss.com"></script>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
-		<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-	</head>
-	<body class="bg-black text-white">
-		<!-- Navigation (loaded from navigation.html) -->
-		<div id="navbar-container"></div>
-
-		<div id="ambient-bg">
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-			<div class="shooting-star"></div>
-		</div>
-
-		<div id="scroll-progress"></div>
-
-		<div class="mt-16 corner-widget top-left hidden lg:block">
-			<div id="live-clock">00:00:00</div>
-			<div>System: Active</div>
-		</div>
-
-		<div class="corner-widget bottom-left hidden lg:block">
-			<div>Scroll to exploration</div>
-			<div class="mt-2 w-10 h-[1px] bg-white/20 overflow-hidden">
-				<div class="w-full h-full bg-white animate-[slide_2s_infinite]"></div>
-			</div>
-		</div>
-
-		<div class="corner-widget bottom-right hidden lg:block text-right">
-			<div id="mouse-coords">X: 000 // Y: 000</div>
-			<div>CozySpot Interface v.3.2</div>
-		</div>
+<!-- Collections section content (Shopify section fragment) -->
 
 		<main class="px-6 lg:px-16 py-16 space-y-12 max-w-6xl mx-auto">
 			<!-- Hero / Banner -->
@@ -106,9 +67,6 @@
 		<div id="footer-container"></div>
 
 		<!-- Cart (loaded from cart.html) -->
-		<div id="cart-container"></div>
-
-		<script src="script.js"></script>
 		<script>
 			/**
 			 * Collections Page
@@ -127,6 +85,9 @@
 				sort: 'popular',
 				search: '',
 			}
+
+			const dataUrl = "{{ 'data.json' | asset_url }}"
+			const fallbackImage = "{{ 'min-01.jpg' | asset_url }}"
 
 			const sortEl = document.getElementById('sort-select')
 			const searchEl = document.getElementById('search-input')
@@ -245,7 +206,7 @@
 
 				try {
 					// Загружаем data.json
-					const response = await fetch('data.json')
+					const response = await fetch(dataUrl)
 
 					if (!response.ok) {
 						throw new Error(`HTTP error! status: ${response.status}`)
@@ -272,7 +233,7 @@
 							price: parseFloat(p.variants?.[0]?.price || 0),
 							oldPrice: p.compareAtPrice ? parseFloat(p.compareAtPrice) : null,
 							currency: '€',
-							image: p.images?.[0]?.url || 'gallery/placeholder.jpg',
+							image: p.images?.[0]?.url || fallbackImage,
 							badge: null,
 							isHit: false,
 							isNew: false,
@@ -293,7 +254,7 @@
 								price: parseFloat(fb.price) || 0,
 								oldPrice: fb.old_price ? parseFloat(fb.old_price) : null,
 								currency: fb.currency || '€',
-								image: fb.image || 'gallery/placeholder.jpg',
+								image: fb.image || fallbackImage,
 								badge: fb.badge || null,
 								isHit: fb.is_hit || false,
 								isNew: fb.is_new || false,
@@ -362,48 +323,16 @@
 				})
 			}
 
-			// Load shared components
-			document.addEventListener('DOMContentLoaded', () => {
-				// Navigation
-				fetch('navigation.html')
-					.then(r => r.text())
-					.then(html => {
-						const nav = document.getElementById('navbar-container')
-						if (nav) nav.innerHTML = html
-						// Run menu scripts after navigation is loaded
-						if (typeof runMenuScripts === 'function') {
-							runMenuScripts()
-						}
-					})
-					.catch(err => console.error('Failed to load navigation:', err))
-
-				// Footer
-				fetch('footer.html')
-					.then(r => r.text())
-					.then(html => {
-						const footer = document.getElementById('footer-container')
-						if (footer) footer.innerHTML = html
-					})
-					.catch(err => console.error('Failed to load footer:', err))
-
-				// Cart
-				fetch('cart.html')
-					.then(r => r.text())
-					.then(html => {
-						const cartHost = document.getElementById('cart-container')
-						if (cartHost) cartHost.innerHTML = html
-						// Initialize cart after DOM is ready
-						requestAnimationFrame(() => {
-							if (typeof Cart !== 'undefined' && Cart.init) {
-								Cart.init()
-							}
-						})
-					})
-					.catch(err => console.error('Failed to load cart:', err))
-
-				// Load products from data.json / Shopify
-				loadCollectionProducts()
-			})
-		</script>
-	</body>
-</html>
+{% schema %}
+{
+  "name": "Collections",
+  "settings": [],
+  "blocks": [],
+  "presets": [
+	{
+	  "name": "Collections",
+	  "category": "Pages"
+	}
+  ]
+}
+{% endschema %}
