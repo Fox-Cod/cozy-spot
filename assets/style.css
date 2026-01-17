@@ -253,7 +253,7 @@ img {
 	border-radius: 40px;
 	filter: brightness(0.2);
 	opacity: 0;
-	transform: scale(0.8);
+	transform: scale(0.92);
 	transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 .mySwiper .swiper-slide-active,
@@ -261,11 +261,11 @@ img {
 .mySwiper .swiper-slide-prev {
 	opacity: 1;
 	filter: brightness(0.5);
-	transform: scale(0.9);
+	transform: scale(0.98);
 }
 .mySwiper .swiper-slide-active {
 	filter: brightness(1);
-	transform: scale(1.05) !important;
+	transform: scale(1) !important;
 	z-index: 10;
 }
 .mySwiper .swiper-slide img {
@@ -654,7 +654,7 @@ img {
 	.hero-title {
 		font-size: 6vw;
 	}
-	.swiper-slide {
+	.mySwiper .swiper-slide {
 		width: 28vw !important;
 	}
 	header {
@@ -895,6 +895,23 @@ img {
 	align-self: start;
 }
 
+.product-gallery .productMainSwiper,
+.product-gallery .productThumbsSwiper {
+	position: relative;
+	z-index: 1;
+}
+
+.product-gallery .product-gallery-prev,
+.product-gallery .product-gallery-next,
+.product-gallery button[onclick='openProductLightbox()'] {
+	z-index: 5;
+	pointer-events: auto;
+}
+
+.product-gallery:hover {
+	opacity: 1;
+}
+
 @media (max-width: 1023px) {
 	.product-gallery {
 		position: relative;
@@ -1131,6 +1148,7 @@ img {
 /* Image zoom hover effect */
 .product-gallery .swiper-slide img {
 	transition: transform 0.5s ease;
+	pointer-events: none;
 }
 
 .product-gallery:hover .swiper-slide img {

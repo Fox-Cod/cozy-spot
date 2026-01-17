@@ -1,7 +1,7 @@
 {
 	"shopify_config": {
-		"store_domain": "your-store.myshopify.com",
-		"storefront_access_token": "YOUR_STOREFRONT_ACCESS_TOKEN"
+		"store_domain": "cyij3a-x6.myshopify.com",
+		"storefront_access_token": "PASTE_STOREFRONT_TOKEN_HERE"
 	},
 
 	"product_details": {
@@ -25,7 +25,7 @@
 				],
 				"badge": "Hot",
 				"badge_style": "hot",
-				"featured": true,
+				"shopify_handle": "cloud-neon-light-logo-usb-or-battery-powered-novel-night-light-used-to-decorate-girls-bedrooms-birthday-party-gifts-wedding",
 				"rating": "4.8",
 				"reviews_count": "124",
 				"available": true,
@@ -117,7 +117,7 @@
 			}
 		},
 		{
-			"shopify_handle": "test-product-lamp",
+			"shopify_handle": "cloud-neon-light-logo-usb-or-battery-powered-novel-night-light-used-to-decorate-girls-bedrooms-birthday-party-gifts-wedding",
 			"fallback": {
 				"title": "Loft Lamp Pro",
 				"category": "Workspace",
@@ -157,9 +157,9 @@
 				{
 					"top": "45%",
 					"left": "30%",
-					"shopify_handle": "test-product-lamp",
+					"shopify_handle": "cloud-neon-light-logo-usb-or-battery-powered-novel-night-light-used-to-decorate-girls-bedrooms-birthday-party-gifts-wedding",
 					"fallback": {
-						"product_name": "Loft Lamp Pro",
+						"product_name": "Test Product",
 						"description": "Aluminum housing, warm ambient light. Perfect for late night coding sessions.",
 						"price": "89",
 						"currency": "€",
@@ -182,14 +182,14 @@
 		{
 			"id": "scene-3",
 			"category": "Nature",
-			"title": "Nature Setup #3",
+			"title": "Nature Setup #03",
 			"image": "bio-3.jpg",
 			"hotspots": []
 		},
 		{
 			"id": "scene-4",
 			"category": "Nature",
-			"title": "Nature Setup #4",
+			"title": "Nature Setup #04",
 			"image": "bio-4.jpg",
 			"hotspots": []
 		},

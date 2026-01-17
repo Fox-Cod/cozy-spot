@@ -2689,12 +2689,12 @@ window.addToCart = async function (productIdOrHandle, buttonEl) {
 
 	// Button animation
 	if (buttonEl) {
-		const originalText = buttonEl.innerText
-		buttonEl.innerText = 'ADDED ✓'
-		buttonEl.classList.add('text-green-100')
+		const originalHtml = buttonEl.innerHTML
+		buttonEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M20 6L9 17l-5-5" /></svg>`
+		buttonEl.classList.add('text-green-500')
 		setTimeout(() => {
-			buttonEl.innerText = originalText
-			buttonEl.classList.remove('text-green-100')
+			buttonEl.innerHTML = originalHtml
+			buttonEl.classList.remove('text-green-500')
 		}, 1500)
 	}
 
@@ -3666,6 +3666,20 @@ function pulseBadge() {
 
 			jsonLd.textContent = JSON.stringify(schema, null, 2)
 		}
+	}
+
+	function autoInitPdp() {
+		const hasPdp =
+			document.querySelector('.productMainSwiper') ||
+			document.getElementById('product-main-images')
+		if (!hasPdp) return
+		initProductPage()
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', autoInitPdp)
+	} else {
+		autoInitPdp()
 	}
 
 	// Expose functions globally

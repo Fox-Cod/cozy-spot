@@ -55,7 +55,7 @@
 						</div>
 					</div>
 				</div>
-				<p id="results-count" class="text-xs text-white/40 uppercase tracking-[0.2em]">0 items</p>
+				<p id="results-count" class="text-xs text-white/40 uppercase tracking-[0.2em]">{{ collections['all'].products_count | default: 0 }} items</p>
 			</section>
 
             <!-- Product Grid -->
@@ -63,7 +63,7 @@
 				{% assign products = collections['all'].products %}
 				{% if products.size > 0 %}
 					{% for product in products %}
-						<article class="p-3 border border-white/5 bg-gradient-to-b from-white/[0.05] to-transparent backdrop-blur-2xl transition-all duration-500 hover:-translate-y-3 hover:border-purple-500/40 hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.2)] rounded-2xl overflow-hidden">
+						<article class="group p-3 border border-white/5 bg-gradient-to-b from-white/[0.05] to-transparent backdrop-blur-2xl transition-all duration-500 hover:-translate-y-3 hover:border-purple-500/40 hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.2)] rounded-2xl overflow-hidden">
 							<a href="{{ product.url }}" class="block">
 								<div class="relative h-52 bg-white/5 overflow-hidden rounded-2xl">
 									{% if product.featured_image %}
@@ -84,6 +84,7 @@
 										data-handle="{{ product.handle }}"
 										aria-label="Add {{ product.title | escape }} to cart"
 										title="Add to cart"
+										onclick="addToCart('{{ product.handle }}', this)"
 									>
 										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
 											<circle cx="9" cy="21" r="1"></circle>
