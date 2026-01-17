@@ -8,13 +8,11 @@
  * ------------------------------------------------------------
  */
 {
-  "sections": {
-    "main": {
-      "type": "product",
-      "settings": {}
-    }
-  },
-  "order": [
-    "main"
-  ]
+	"sections": {
+		"main": {
+			"type": "product-info",
+			"settings": {}
+		}
+	},
+	"order": ["main"]
 }

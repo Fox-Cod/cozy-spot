@@ -16,6 +16,7 @@ const CozySpotRoutes = CozySpotConfig.routes || {}
 const dataUrl = CozySpotConfig.dataUrl || 'data.json'
 const fallbackImage = CozySpotConfig.fallbackImage || ''
 const assetBase = CozySpotConfig.assetBase || ''
+const currencySymbol = CozySpotConfig.currencySymbol || '$'
 const getCollectionsUrl = () => CozySpotRoutes.collections || '/collections'
 const getShowcaseUrl = () => CozySpotRoutes.showcase || '#showcase'
 const getProductUrl = handle => {
@@ -57,6 +58,53 @@ const normalizeDataImages = data => {
 	}
 	fix(data)
 	return data
+}
+
+const formatMoneyFromCents = cents => {
+	if (cents === null || cents === undefined) return null
+	const value = typeof cents === 'string' ? parseFloat(cents) : cents
+	if (Number.isNaN(value)) return null
+	return (value / 100).toFixed(2)
+}
+
+const mapLiquidProductToPdp = liquidProduct => {
+	if (!liquidProduct) return null
+	const images = Array.isArray(liquidProduct.images)
+		? liquidProduct.images.map(img => resolveAssetImage(img?.src || img))
+		: []
+	const variants = Array.isArray(liquidProduct.variants)
+		? liquidProduct.variants.map(v => ({
+				id: v.id,
+				title: v.title,
+				sku: v.sku,
+				available: v.available,
+				price: formatMoneyFromCents(v.price),
+				image: resolveAssetImage(v.featured_image?.src || v.image),
+				options: v.options || v.selectedOptions,
+			}))
+		: []
+	const price = formatMoneyFromCents(liquidProduct.price)
+	const oldPrice = formatMoneyFromCents(liquidProduct.compare_at_price)
+	return {
+		source: 'shopify',
+		id: liquidProduct.id,
+		handle: liquidProduct.handle,
+		title: liquidProduct.title,
+		description: liquidProduct.description || '',
+		full_description: liquidProduct.description || '',
+		vendor: liquidProduct.vendor,
+		category: liquidProduct.type,
+		tags: liquidProduct.tags || [],
+		images: images.length ? images : [fallbackImage],
+		price: price || 'N/A',
+		old_price: oldPrice || null,
+		currency: currencySymbol,
+		sku: variants[0]?.sku,
+		available: liquidProduct.available,
+		quantity_available: null,
+		variants,
+		options: liquidProduct.options || [],
+	}
 }
 
 /* -------------------- Background Engine -------------------- */
@@ -2781,6 +2829,7 @@ function pulseBadge() {
 
 	// Get product handle from URL
 	function getProductHandleFromURL() {
+		if (CozySpotConfig.productHandle) return CozySpotConfig.productHandle
 		const params = new URLSearchParams(window.location.search)
 		return (
 			params.get('handle') || params.get('product') || 'test-product-lamp'
@@ -2794,6 +2843,20 @@ function pulseBadge() {
 
 		// Show loading state
 		showLoadingState()
+
+		if (CozySpotConfig.productData && CozySpotConfig.productData.handle) {
+			const mapped = mapLiquidProductToPdp(CozySpotConfig.productData)
+			if (mapped) {
+				currentProduct = mapped
+				productData = {}
+				renderProductPage(mapped)
+				initProductSwipers()
+				initMobileStickyBar()
+				updateSEOMeta(mapped)
+				console.log('[PDP] Product loaded from Liquid:', mapped)
+				return
+			}
+		}
 
 		try {
 			// Load data.json

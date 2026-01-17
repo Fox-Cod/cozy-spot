@@ -148,7 +148,7 @@ img {
 }
 
 /* --- Nav & small utilities --- */
-nav {
+.site-nav {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -167,8 +167,8 @@ nav {
 	color: #fff;
 	text-decoration: none;
 }
-nav a,
-nav button {
+.site-nav a,
+.site-nav button {
 	color: inherit;
 }
 .nav-link {

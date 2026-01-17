@@ -33,6 +33,7 @@
       window.CozySpot.dataUrl = "{{ 'data.json' | asset_url }}";
       window.CozySpot.fallbackImage = "{{ 'min-01.jpg' | asset_url }}";
       window.CozySpot.assetBase = "{{ 'min-01.jpg' | asset_url | split: 'min-01.jpg' | first }}";
+      window.CozySpot.currencySymbol = {{ cart.currency.symbol | json }};
       window.CozySpot.routes = {
         root: "{{ routes.root_url }}",
         collections: "{{ routes.collections_url }}",
