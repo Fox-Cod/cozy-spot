@@ -8,13 +8,11 @@
  * ------------------------------------------------------------
  */
 {
-  "sections": {
-    "main": {
-      "type": "hello-world",
-      "settings": {}
-    }
-  },
-  "order": [
-    "main"
-  ]
+	"sections": {
+		"main": {
+			"type": "index",
+			"settings": {}
+		}
+	},
+	"order": ["main"]
 }

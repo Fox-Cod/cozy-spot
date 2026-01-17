@@ -1,0 +1,13 @@
+{
+  "type": "navigation",
+  "name": "t:general.navigation",
+  "sections": {
+    "navigation": {
+      "type": "navigation",
+      "settings": {}
+    }
+  },
+  "order": [
+    "navigation"
+  ]
+}

@@ -1,0 +1,113 @@
+<nav class="fixed top-0 w-full z-[100] px-4 md:px-10 py-4 flex justify-between items-center bg-black/60 backdrop-blur-xl border-b border-white/5">
+	<a href="/#main" class="text-xl font-black italic tracking-tighter z-[110] relative text-white logo-link"> CS.<span id="logo-suffix" class="ml-1"></span> </a>
+
+	<div class="hidden md:flex gap-12">
+		<a href="{{ pages['showcase'].url | default: '/pages/showcase' }}" class="nav-link text-[11px] uppercase font-bold tracking-widest opacity-70 hover:opacity-100 transition">Showcase</a>
+		<a href="/collections" class="nav-link text-[11px] uppercase font-bold tracking-widest opacity-70 hover:opacity-100 transition">Collections</a>
+		<a href="{{ pages['about-us'].url | default: '/pages/about-us' }}" class="nav-link text-[11px] uppercase font-bold tracking-widest opacity-70 hover:opacity-100 transition">About us</a>
+	</div>
+
+	<div class="flex items-center gap-4 z-[110] relative">
+		<!-- Profile Icon -->
+		<button class="hover:opacity-60 transition" aria-label="Profile">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="text-white"
+			>
+				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+				<circle cx="12" cy="7" r="4"></circle>
+			</svg>
+		</button>
+
+		<!-- Cart Icon -->
+		<button id="cart-toggle" class="relative hover:opacity-60 transition" aria-label="Shopping cart">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="text-white"
+			>
+				<circle cx="9" cy="21" r="1"></circle>
+				<circle cx="20" cy="21" r="1"></circle>
+				<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+			</svg>
+			<span
+				id="header-cart-count"
+				class="absolute -top-1 -right-2 bg-purple-500 text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center opacity-0 scale-0 transition-all duration-300"
+				>0</span
+			>
+		</button>
+
+		<!-- Menu Icon (Mobile Only) -->
+		<button
+			id="menu-toggle"
+			type="button"
+			onclick="console.log('menu-toggle inline click')"
+			class="md:hidden hover:opacity-60 transition"
+			aria-controls="mobile-menu"
+			aria-expanded="false"
+			aria-label="Menu"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="text-white"
+			>
+				<line x1="3" y1="12" x2="21" y2="12"></line>
+				<line x1="3" y1="6" x2="21" y2="6"></line>
+				<line x1="3" y1="18" x2="21" y2="18"></line>
+			</svg>
+		</button>
+	</div>
+</nav>
+
+<!-- Mobile menu moved here to avoid layout/transform issues on small screens -->
+<div id="mobile-menu" class="fixed inset-0 bg-black/95 flex items-start justify-start pt-20 transition-transform duration-500 z-[105] overflow-y-auto" aria-hidden="true">
+	<!-- Close button (visible on mobile) -->
+	<button
+		id="mobile-menu-close"
+		onclick="console.log('mobile-menu-close inline click')"
+		type="button"
+		class="absolute top-6 right-6 z-120 text-white bg-white/6 hover:bg-white/12 rounded-full w-10 h-10 flex items-center justify-center"
+		aria-label="Close menu"
+	>
+		✕
+	</button>
+
+	<div class="mobile-menu-inner w-full max-w-[420px] mx-auto px-6 flex flex-col items-center gap-8 pt-6">
+		<a href="{{ pages['showcase'].url | default: '/pages/showcase' }}" class="mobile-nav-link text-3xl font-black italic uppercase text-white">Showcase</a>
+		<a href="/collections" class="mobile-nav-link text-3xl font-black italic uppercase text-white">Collections</a>
+		<a href="#" class="mobile-nav-link text-3xl font-black italic uppercase text-white">Reviews</a>
+		<a href="{{ pages['about-us'].url | default: '/pages/about-us' }}" class="mobile-nav-link text-3xl font-black italic uppercase text-white">About us</a>
+
+		<div class="mt-auto pb-20 flex flex-col items-center gap-4 opacity-30 w-full">
+			<div class="w-10 h-[1px] bg-white mx-auto"></div>
+			<p class="text-[10px] uppercase tracking-[0.5em]">CozySpot Studio</p>
+		</div>
+	</div>
+</div>
+
+<!-- Menu logic is handled by runMenuScripts() in each page -->
+
+<script src="script.js"></script>

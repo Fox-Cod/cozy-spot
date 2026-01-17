@@ -1,57 +1,51 @@
-<footer>
-  <div class="footer__copyright">
-    &copy;
-    {{ 'now' | date: '%Y' }}
-    {{ shop.name | link_to: routes.root_url }}, {{ powered_by_link }}
-  </div>
+<footer class="bg-black pt-24 pb-12 border-t border-white/5">
+	<div class="max-w-7xl mx-auto px-6">
+		<div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-20">
+			<div class="space-y-6">
+				<div class="text-4xl font-black italic uppercase tracking-tighter text-white">Cozy<span class="text-purple-600">Spot</span></div>
+				<p class="text-gray-500 text-xs max-w-xs leading-relaxed uppercase tracking-wider">Creating premium industrial workspaces for creators, developers, and dreamers.</p>
+			</div>
 
-  <div class="footer__links">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
-  </div>
+			<div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+				<div class="flex flex-col gap-4">
+					<span class="text-[10px] font-black uppercase text-white/30 tracking-[0.3em]">Explore</span>
+					<a href="showcase.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Showroom</a>
+					<a href="collections.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Collections</a>
+					<a href="about.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">About Us</a>
+				</div>
+				<div class="flex flex-col gap-4">
+					<span class="text-[10px] font-black uppercase text-white/30 tracking-[0.3em]">Support</span>
+					<a href="shipping-policy.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Shipping</a>
+					<a href="refund-policy.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Returns</a>
+					<a href="contacts.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Contact</a>
+				</div>
+				<div class="flex flex-col gap-4">
+					<span class="text-[10px] font-black uppercase text-white/30 tracking-[0.3em]">Legal</span>
+					<a href="privacy-policy.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Privacy</a>
+					<a href="terms-of-service.html" class="text-xs uppercase font-bold hover:text-purple-500 transition-colors">Terms</a>
+				</div>
+			</div>
+		</div>
 
-  <div class="footer__payment">
-    {% if section.settings.show_payment_icons %}
-      {% for type in shop.enabled_payment_types %}
-        {{ type | payment_type_svg_tag }}
-      {% endfor %}
-    {% endif %}
-  </div>
+		<div class="py-8 border-y border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+			<div class="flex items-center gap-6 opacity-40 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
+				<span class="text-[10px] font-bold text-white uppercase tracking-widest mr-4">We Accept:</span>
+				<img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="h-3" />
+				<img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" class="h-5" />
+				<img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" class="h-4" />
+			</div>
+
+			<div class="flex gap-6">
+				<a href="#" class="text-white/40 hover:text-white transition-colors text-sm">Discord</a>
+			</div>
+		</div>
+
+		<div class="mt-12 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+			<p class="text-gray-600 text-[9px] tracking-[0.4em] uppercase">© 2026 CozySpot — REDEFINING SPACE</p>
+			<div class="flex items-center gap-2">
+				<div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+				<span class="text-[9px] text-gray-500 uppercase tracking-widest">All systems operational</span>
+			</div>
+		</div>
+	</div>
 </footer>
-
-{% stylesheet %}
-  footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-  }
-  footer a {
-    text-decoration: none;
-    color: var(--color-foreground);
-  }
-  footer .footer__links,
-  footer .footer__payment {
-    display: flex;
-    gap: 1rem;
-  }
-{% endstylesheet %}
-
-{% schema %}
-{
-  "name": "t:general.footer",
-  "settings": [
-    {
-      "type": "link_list",
-      "id": "menu",
-      "label": "t:labels.menu"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_payment_icons",
-      "label": "t:labels.show_payment_icons",
-      "default": true
-    }
-  ]
-}
-{% endschema %}

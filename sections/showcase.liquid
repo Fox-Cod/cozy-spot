@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CozySpot | Gallery Collection</title>
+
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+
+	</head>
+	<body class="antialiased">
+		<!-- Navigation (loaded from navigation.html) -->
+		<div id="navbar-container"></div>
+
+		<div id="ambient-bg">
+			<div class="shooting-star"></div>
+			<div class="shooting-star"></div>
+			<div class="shooting-star"></div>
+		</div>
+
+		<div id="scroll-progress"></div>
+
+		<div class="mt-16 corner-widget top-left hidden lg:block">
+			<div id="live-clock">00:00:00</div>
+			<div>System: Active</div>
+		</div>
+
+		<div class="corner-widget bottom-left hidden lg:block">
+			<div>Scroll to exploration</div>
+			<div class="mt-2 w-10 h-[1px] bg-white/20 overflow-hidden">
+				<div class="w-full h-full bg-white animate-[slide_2s_infinite]"></div>
+			</div>
+		</div>
+
+		<div class="corner-widget bottom-right hidden lg:block text-right">
+			<div id="mouse-coords">X: 000 // Y: 000</div>
+			<div>CozySpot Interface v.3.2</div>
+		</div>
+
+		<section id="hero-inspiration-section" class="hidden md:flex relative pt-32 pb-12 overflow-hidden min-h-[60vh] flex-col justify-center">
+			<div class="text-center mb-10 relative z-10 px-4">
+				<h1 class="text-[clamp(3rem,10vw,6rem)] md:text-7xl font-black uppercase italic tracking-tighter mb-4">Inspiration <span class="text-purple-600">Flow</span></h1>
+				<p class="text-white/50 text-xs md:text-sm uppercase tracking-widest">Crafting the perfect mood for focus</p>
+			</div>
+
+			<div class="swiper galleryHeroSwiper hidden md:block w-full h-[400px] mt-8">
+				<div class="swiper-wrapper" id="gallery-hero-wrapper"></div>
+			</div>
+
+			<div class="swiper galleryHeroSwiper block md:hidden w-full h-[300px] mt-8">
+				<div class="swiper-wrapper" id="gallery-hero-wrapper"></div>
+			</div>
+
+			<div class="absolute inset-y-0 left-0 w-12 md:w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none"></div>
+			<div class="absolute inset-y-0 right-0 w-12 md:w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none"></div>
+		</section>
+
+		<section class="max-w-[1600px] mx-auto px-6 py-20 border-t border-white/5">
+			<div class="mb-16">
+				<h2 class="text-6xl font-black uppercase italic leading-none tracking-tighter">All <span class="text-purple-600">Scenes</span><span class="text-white/10">.</span></h2>
+				<div class="flex items-center gap-4 mt-4">
+					<div class="h-[1px] w-20 bg-purple-500/50"></div>
+					<p class="text-[10px] uppercase tracking-[0.5em] text-white/30">Atmospheric database</p>
+				</div>
+			</div>
+
+			<div id="gallery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+		</section>
+
+		<div id="global-viewer" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md hidden flex-col">
+			<button
+				onclick="closeViewer()"
+				class="absolute top-8 right-8 z-[110] bg-white/10 hover:bg-white/20 text-white w-10 h-10 flex items-center justify-center rounded-full transition-all border border-white/5 text-xl"
+			>
+				✕
+			</button>
+			<!-- Viewer navigation -->
+			<button id="viewer-prev" onclick="prevViewerRoom()" aria-label="Previous image" class="viewer-nav left hidden md:flex">‹</button>
+			<button id="viewer-next" onclick="nextViewerRoom()" aria-label="Next image" class="viewer-nav right hidden md:flex">›</button>
+
+			<div id="viewer-controls" class="absolute top-8 left-8 z-[115] hidden md:flex gap-3 items-center">
+				<button onclick="zoomOut()" class="bg-white/10 hover:bg-white/20 text-white w-10 h-10 flex items-center justify-center rounded-full transition-all" title="Zoom Out">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="18"
+						height="18"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<line x1="5" y1="12" x2="19" y2="12"></line>
+					</svg>
+				</button>
+
+				<button
+					onclick="zoomIn()"
+					class="bg-white/10 hover:bg-white/20 text-white w-10 h-10 flex items-center justify-center rounded-full transition-all border border-white/5"
+					title="Zoom In"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="18"
+						height="18"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<line x1="12" y1="5" x2="12" y2="19"></line>
+						<line x1="5" y1="12" x2="19" y2="12"></line>
+					</svg>
+				</button>
+
+				<button
+					id="explore-toggle"
+					onclick="toggleExploreMode()"
+					class="bg-white/10 hover:bg-white/20 text-white px-4 h-10 flex items-center justify-center gap-2 rounded-full transition-all border border-white/5"
+					title="Toggle Explore Mode"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="20"
+						height="20"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<circle cx="11" cy="11" r="8"></circle>
+						<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+						<line x1="11" y1="8" x2="11" y2="14"></line>
+						<line x1="8" y1="11" x2="14" y2="11"></line>
+					</svg>
+				</button>
+			</div>
+
+			<div class="relative w-full h-full flex items-center justify-center overflow-hidden">
+				<div id="viewer-media-wrapper" class="relative">
+					<img id="viewer-img" src="" loading="lazy" class="max-w-full max-h-full object-contain rounded-3xl" />
+
+					<div id="hotspots-container" class="absolute inset-0"></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="sheet-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-[1000]" onclick="closeSheet()"></div>
+		<div
+			id="bottom-sheet"
+			class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] bg-[#111] border-t border-white/10 rounded-t-[2rem] z-[1001] translate-y-full transition-transform duration-300 pb-10"
+		>
+			<div id="sheet-grabber" class="w-full py-4 flex justify-center cursor-grab"><div class="w-12 h-1 bg-white/20 rounded-full"></div></div>
+			<div id="sheet-content" class="px-6"></div>
+		</div>
+
+		<!-- Footer (loaded from footer.html) -->
+		<div id="footer-container"></div>
+
+		<!-- Cart (loaded from cart.html) -->
+		<div id="cart-container"></div>
+
+		<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+		<script src="script.js"></script>
+		<!-- Load Navigation -->
+		<script>
+			fetch('navigation.html')
+				.then(response => response.text())
+				.then(html => {
+					document.getElementById('navbar-container').innerHTML = html
+					// Re-run menu scripts after loading
+					runMenuScripts()
+					// Call updateLogo after navigation is loaded
+					if (typeof updateLogo === 'function') {
+						updateLogo()
+					}
+				})
+				.catch(err => console.error('Failed to load navigation:', err))
+
+			// Load Footer
+			fetch('footer.html')
+				.then(response => response.text())
+				.then(html => {
+					document.getElementById('footer-container').innerHTML = html
+				})
+				.catch(err => console.error('Failed to load footer:', err))
+
+			// Load Cart
+			fetch('cart.html')
+				.then(response => response.text())
+				.then(html => {
+					document.getElementById('cart-container').innerHTML = html
+					// Initialize cart after loading
+					if (typeof Cart !== 'undefined' && Cart.init) {
+						Cart.init()
+					}
+				})
+				.catch(err => console.error('Failed to load cart:', err))
+		</script>
+	</body>
+</html>

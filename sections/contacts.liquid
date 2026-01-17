@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru-RU">
+	<!doctype html>
+	<html lang="en-US">
+		<head>
+			<meta charset="utf-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1" />
+			<title>CozySpot — Contact</title>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+
+		</head>
+		<body class="bg-[#050505] text-white">
+			<!-- Navigation -->
+			<div id="navbar-container"></div>
+
+            <div id="ambient-bg">
+			<div class="shooting-star"></div>
+			<div class="shooting-star"></div>
+			<div class="shooting-star"></div>
+		</div>
+
+		<div id="scroll-progress"></div>
+
+		<div class="mt-16 corner-widget top-left hidden lg:block">
+			<div id="live-clock">00:00:00</div>
+			<div>System: Active</div>
+		</div>
+
+		<div class="corner-widget bottom-left hidden lg:block">
+			<div>Scroll to exploration</div>
+			<div class="mt-2 w-10 h-[1px] bg-white/20 overflow-hidden">
+				<div class="w-full h-full bg-white animate-[slide_2s_infinite]"></div>
+			</div>
+		</div>
+
+		<div class="corner-widget bottom-right hidden lg:block text-right">
+			<div id="mouse-coords">X: 000 // Y: 000</div>
+			<div>CozySpot Interface v.3.2</div>
+		</div>
+
+			<main class="max-w-4xl mx-auto px-6 py-24">
+				<header class="text-center mb-12">
+					<h1 class="text-4xl md:text-6xl font-black italic">Get in Touch</h1>
+					<p class="text-gray-400 mt-4">We're happy to help — questions about products, orders or partnerships.</p>
+				</header>
+
+				<section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+					<div class="space-y-6">
+						<div>
+							<h3 class="text-xl font-bold">Contact Information</h3>
+							<p class="text-gray-400 mt-2 text-sm">Choose the channel that's most convenient for you.</p>
+						</div>
+
+						<ul class="space-y-3 text-sm">
+							<li><strong>Email:</strong> <a href="mailto:cozyspot.team@gmail.com" class="text-purple-400 hover:underline">cozyspot.team@gmail.com</a></li>
+							<li><strong>Hours:</strong> Mon–Sun, 09:00–21:00 (UTC)</li>
+						</ul>
+
+						<div class="mt-6 text-sm text-gray-500">
+							<p>Warehouse & returns address is available in <a href="shipping-policy.html" class="text-white/80 hover:underline">Shipping Policy</a>.</p>
+						</div>
+					</div>
+
+					<div>
+						<div class="bg-[#0b0b0b] border border-white/5 rounded-2xl p-6">
+							<form id="contact-form" class="space-y-4" action="mailto:cozyspot.team@gmail.com" method="post" enctype="text/plain">
+								<div>
+									<label class="block text-[12px] mb-1">Name</label>
+									<input name="name" required class="w-full bg-transparent border border-white/10 rounded px-3 py-2 text-sm" />
+								</div>
+
+								<div>
+									<label class="block text-[12px] mb-1">Email</label>
+									<input type="email" name="email" required class="w-full bg-transparent border border-white/10 rounded px-3 py-2 text-sm" />
+								</div>
+
+								<div>
+									<label class="block text-[12px] mb-1">Message</label>
+									<textarea name="message" rows="5" required class="w-full bg-transparent border border-white/10 rounded px-3 py-2 text-sm"></textarea>
+								</div>
+
+								<div class="flex items-center justify-between">
+									<button type="submit" class="bg-purple-600 px-4 py-2 rounded font-bold uppercase text-[12px]">Send</button>
+									<button type="reset" class="text-white/60 text-sm">Clear</button>
+								</div>
+							</form>
+
+							<p class="text-[11px] text-white/40 mt-3">If the form doesn't send, email us directly at cozyspot.team@gmail.com</p>
+						</div>
+					</div>
+				</section>
+			</main>
+
+			<!-- Footer -->
+			<div id="footer-container"></div>
+
+			<script>
+				// Load Navigation
+				fetch('navigation.html')
+					.then(r => r.text())
+					.then(html => { document.getElementById('navbar-container').innerHTML = html })
+					.catch(()=>{})
+
+				// Load Footer
+				fetch('footer.html')
+					.then(r => r.text())
+					.then(html => { document.getElementById('footer-container').innerHTML = html })
+					.catch(()=>{})
+			</script>
+		</body>
+	</html>
+	</body>
+</html>

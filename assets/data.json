@@ -1,0 +1,435 @@
+{
+	"shopify_config": {
+		"store_domain": "your-store.myshopify.com",
+		"storefront_access_token": "YOUR_STOREFRONT_ACCESS_TOKEN"
+	},
+
+	"product_details": {
+		"test-product-lamp": {
+			"shopify_handle": "test-product-lamp",
+			"fallback": {
+				"title": "Loft Lamp Pro",
+				"sku": "LAMP-001",
+				"category": "Workspace",
+				"vendor": "CozySpot",
+				"description": "Aluminum housing, warm light. Perfect for your desk setup.",
+				"full_description": "<p>The <strong>Loft Lamp Pro</strong> is the ultimate desk companion for creators, developers, and night owls. Crafted from premium brushed aluminum with a sleek industrial aesthetic, this lamp delivers warm 2700K light that's easy on the eyes during late-night sessions.</p><h3>Key Features</h3><ul><li>Premium brushed aluminum construction</li><li>Warm 2700K LED light (12W, energy efficient)</li><li>Adjustable arm with 180° rotation</li><li>Touch-sensitive dimmer control</li><li>Memory function - remembers last brightness setting</li><li>Minimalist cable management system</li></ul><h3>Perfect For</h3><p>Home offices, gaming setups, creative studios, or any workspace where you need focused, comfortable lighting without harsh glare.</p>",
+				"price": "89",
+				"old_price": "119",
+				"currency": "€",
+				"images": [
+					"min-01.jpg",
+					"min-02.jpg",
+					"min-03.jpg",
+					"min-04.jpg"
+				],
+				"badge": "Hot",
+				"badge_style": "hot",
+				"featured": true,
+				"rating": "4.8",
+				"reviews_count": "124",
+				"available": true,
+				"quantity_available": 50,
+				"variants": [
+					{
+						"id": "lamp-black",
+						"title": "Matte Black",
+						"color": "#1a1a1a",
+						"available": true,
+						"price": "89",
+						"image_index": 0
+					},
+					{
+						"id": "lamp-white",
+						"title": "Arctic White",
+						"color": "#f5f5f5",
+						"available": true,
+						"price": "89",
+						"image_index": 1
+					},
+					{
+						"id": "lamp-brass",
+						"title": "Vintage Brass",
+						"color": "#b5a642",
+						"available": false,
+						"price": "99",
+						"image_index": 2
+					}
+				],
+				"specifications": {
+					"Dimensions": "45 x 15 x 15 cm",
+					"Weight": "1.2 kg",
+					"Material": "Brushed Aluminum, Steel Base",
+					"Power": "12W LED",
+					"Color Temperature": "2700K (Warm White)",
+					"Lumens": "800 lm",
+					"CRI": "> 90",
+					"Lifespan": "50,000 hours",
+					"Voltage": "110-240V AC",
+					"Cable Length": "1.8 m"
+				},
+				"reviews": [
+					{
+						"id": "rev-1",
+						"author": "Alex K.",
+						"rating": 5,
+						"date": "2025-12-15",
+						"title": "Perfect desk lamp!",
+						"content": "This lamp exceeded my expectations. The build quality is exceptional and the warm light is perfect for late-night coding sessions. Highly recommend!",
+						"verified": true
+					},
+					{
+						"id": "rev-2",
+						"author": "Maria S.",
+						"rating": 4,
+						"date": "2025-11-28",
+						"title": "Great quality, minor issue",
+						"content": "Beautiful lamp with great build quality. Only giving 4 stars because the touch dimmer is sometimes too sensitive. Otherwise perfect.",
+						"verified": true
+					},
+					{
+						"id": "rev-3",
+						"author": "James T.",
+						"rating": 5,
+						"date": "2025-11-10",
+						"title": "Worth every penny",
+						"content": "After trying several cheap desk lamps, I finally invested in this one. The difference is night and day. No more eye strain!",
+						"verified": false
+					}
+				]
+			}
+		}
+	},
+
+	"featured_products": [
+		{
+			"shopify_handle": "#",
+			"fallback": {
+				"title": "No connection to the database",
+				"category": "N/A",
+				"description": "N/A",
+				"price": null,
+				"old_price": null,
+				"currency": "€",
+				"image": null,
+				"badge": "In Stock",
+				"badge_style": "default"
+			}
+		},
+		{
+			"shopify_handle": "test-product-lamp",
+			"fallback": {
+				"title": "Loft Lamp Pro",
+				"category": "Workspace",
+				"description": "Aluminum housing, warm light. Perfect for your desk setup.",
+				"price": "89",
+				"currency": "€",
+				"image": "min-01.jpg",
+				"badge": "Hot",
+				"badge_style": "hot",
+				"featured": true,
+				"rating": "4.8",
+				"reviews_count": "124"
+			}
+		},
+		{
+			"shopify_handle": "#",
+			"fallback": {
+				"title": "N/A",
+				"category": "N/A",
+				"description": "N/A",
+				"price": null,
+				"currency": "€",
+				"image": null,
+				"badge": null,
+				"badge_style": null
+			}
+		}
+	],
+
+	"gallery_scenes": [
+		{
+			"id": "scene-1",
+			"category": "Nature",
+			"title": "Nature Setup #01",
+			"image": "bio-01.jpg",
+			"hotspots": [
+				{
+					"top": "45%",
+					"left": "30%",
+					"shopify_handle": "test-product-lamp",
+					"fallback": {
+						"product_name": "Loft Lamp Pro",
+						"description": "Aluminum housing, warm ambient light. Perfect for late night coding sessions.",
+						"price": "89",
+						"currency": "€",
+						"img": "min-01.jpg",
+						"rating": "4.8",
+						"reviews_count": "124",
+						"category": "Workspace",
+						"link": "#"
+					}
+				}
+			]
+		},
+		{
+			"id": "scene-2",
+			"category": "Nature",
+			"title": "Nature Setup #02",
+			"image": "bio-02.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-3",
+			"category": "Nature",
+			"title": "Nature Setup #3",
+			"image": "bio-3.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-4",
+			"category": "Nature",
+			"title": "Nature Setup #4",
+			"image": "bio-4.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-5",
+			"category": "Cozy",
+			"title": "Cozy Setup #01",
+			"image": "cozy-01.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-6",
+			"category": "Cozy",
+			"title": "Cozy Setup #02",
+			"image": "cozy-02.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-7",
+			"category": "Cozy",
+			"title": "Cozy Setup #03",
+			"image": "cozy-03.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-8",
+			"category": "Cozy",
+			"title": "Cozy Setup #04",
+			"image": "cozy-04.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-9",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #01",
+			"image": "cyber-01.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-10",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #02",
+			"image": "cyber-02.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-11",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #03",
+			"image": "cyber-03.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-12",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #04",
+			"image": "cyber-04.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-13",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #05",
+			"image": "cyber-05.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-14",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #06",
+			"image": "cyber-06.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-15",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #07",
+			"image": "cyber-07.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-16",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #08",
+			"image": "cyber-08.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-17",
+			"category": "Cyberpunk",
+			"title": "Cyberpunk Setup #09",
+			"image": "cyber-09.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-18",
+			"category": "Industrial",
+			"title": "Industrial Setup #01",
+			"image": "ind-01.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-19",
+			"category": "Industrial",
+			"title": "Industrial Setup #2",
+			"image": "ind-2.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-20",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #01",
+			"image": "min-01.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-21",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #02",
+			"image": "min-02.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-22",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #03",
+			"image": "min-03.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-23",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #04",
+			"image": "min-04.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-24",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #05",
+			"image": "min-05.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-25",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #06",
+			"image": "min-06.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-26",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #07",
+			"image": "min-07.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-27",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #08",
+			"image": "min-08.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-28",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #09",
+			"image": "min-09.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-29",
+			"category": "Minimalism",
+			"title": "Minimalism Setup #10",
+			"image": "min-10.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-30",
+			"category": "Studio",
+			"title": "Studio Setup #01",
+			"image": "std-01.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-31",
+			"category": "Studio",
+			"title": "Studio Setup #02",
+			"image": "std-02.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-32",
+			"category": "Studio",
+			"title": "Studio Setup #03",
+			"image": "std-03.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-33",
+			"category": "Studio",
+			"title": "Studio Setup #04",
+			"image": "std-04.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-34",
+			"category": "Studio",
+			"title": "Studio Setup #05",
+			"image": "std-05.jpg",
+			"hotspots": []
+		},
+		{
+			"id": "scene-35",
+			"category": "Studio",
+			"title": "Studio Setup #06",
+			"image": "std-06.jpg",
+			"hotspots": []
+		}
+	],
+
+	"collection_products": [
+		{
+			"shopify_handle": "test-product-lamp",
+			"fallback": {
+				"id": "test-product-lamp",
+				"title": "Loft Lamp Pro",
+				"description": "Aluminum housing, warm light. Perfect for your desk setup.",
+				"price": 89,
+				"old_price": 119,
+				"currency": "€",
+				"image": "min-01.jpg",
+				"badge": "Hot",
+				"is_hit": true,
+				"is_new": false,
+				"rating": 4.8,
+				"reviews_count": 124,
+				"available": true
+			}
+		}
+	]
+}
