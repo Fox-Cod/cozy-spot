@@ -29,6 +29,8 @@
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
 
+    <link rel="icon" type="image/png" href="{{ 'cozy-wh-logo-64x.png' | asset_url }}">
+
     <script>
       window.CozySpot = window.CozySpot || {};
       window.CozySpot.dataUrl = "{{ 'data.json' | asset_url }}";
@@ -58,7 +60,6 @@
     {{ content_for_header }}
     <script defer src="https://cdn.judge.me/widget.js"></script>
   </head>
-
   <body>
     {% sections 'navigation-group' %}
 
