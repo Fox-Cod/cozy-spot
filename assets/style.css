@@ -704,7 +704,7 @@ img {
 	}
 }
 
-/* Ретро Киберпанк Текст */
+/* Retro cyberpunk text */
 .text-cyber-retro {
 	background: linear-gradient(
 		to bottom,
@@ -720,7 +720,7 @@ img {
 	font-style: italic;
 }
 
-/* Анимации */
+/* Animations */
 @keyframes float-y {
 	0%,
 	100% {
@@ -851,7 +851,7 @@ img {
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Фикс для Safari/iOS, чтобы меню не улетало за челку */
+/* Fix for Safari/iOS so the menu doesn't slide under the notch */
 #mobile-menu {
 	height: 100vh;
 	height: -webkit-fill-available;
@@ -1298,38 +1298,37 @@ img {
 	overflow: hidden;
 }
 
-/* Выстраиваем всё в один ряд */
+/* Keep everything in one row */
 .custom-jdgm-row {
 	display: flex !important;
 	align-items: center !important;
-	gap: 5px; /* Расстояние между звездой, цифрой и отзывами */
+	gap: 5px; /* Spacing between star, rating, and review count */
 }
 
-/* Скрываем лишние 4 звезды, оставляем 1 дефолтную */
+/* Hide the extra 4 stars, keep one default */
 .custom-jdgm-row .jdgm-star {
 	display: none !important;
 }
 .custom-jdgm-row .jdgm-star:first-child {
 	display: inline-block !important;
-	/* Размер остается дефолтным от Judge.me */
+	/* Size remains Judge.me default */
 }
 
-/* Скрываем стандартный текст Judge.me "10 reviews" */
+/* Hide Judge.me default "10 reviews" text */
 .custom-jdgm-row .jdgm-prev-badge__text {
 	display: none !important;
 }
 
-/* Число рейтинга (например, 4.9) — дефолтный размер */
+/* Rating number (e.g., 4.9) — default size */
 .custom-rating-num {
-	font-size: 14px; /* Примерный дефолтный размер, подстройте под себя */
+	font-size: 14px; /* Approx default size; adjust if needed */
 	font-weight: bold;
 	color: inherit;
 }
 
-/* КОЛ-ВО ОТЗЫВОВ — ваш специфический стиль */
+/* REVIEW COUNT — custom style */
 .custom-reviews-count {
 	color: rgba(255, 255, 255, 0.2) !important; /* text-white/20 */
 	font-size: 10px !important; /* text-[-10px] */
 	white-space: nowrap;
 }
-

@@ -29,7 +29,7 @@
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
 
-    <link rel="icon" type="image/png" href="{{ 'cozy-wh-logo-64x.png' | asset_url }}">
+    <link rel="icon" type="image/png" href="{{ 'cozy-wh-logo-32x.png' | asset_url }}">
 
     <script>
       window.CozySpot = window.CozySpot || {};
@@ -46,7 +46,7 @@
     </script>
 
     <script>
-      // Создаем глобальное хранилище рейтингов
+      // Create a global ratings store
       window.productRatings = {
         {% for product in collections.all.products %}
           "{{ product.id }}": {

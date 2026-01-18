@@ -238,7 +238,7 @@ onDomReady(runReveal)
 
 /* -------------------- Mobile Menu (Event Delegation) -------------------- */
 // Using event delegation so it works regardless of when navigation.html loads
-// Удалена устаревшая event delegation логика для мобильного меню (см. ниже для актуальной реализации)
+// Removed legacy event delegation logic for the mobile menu (see below for the current implementation)
 
 // Keep runMenuScripts for backward compatibility (does nothing now)
 function runMenuScripts() {
@@ -303,13 +303,13 @@ document.addEventListener('mousemove', e => {
 
 /* -------------------- Shopify Integration -------------------- */
 let shopifyConfig = null
-const productCache = new Map() // Кэш товаров по handle
+const productCache = new Map() // Product cache by handle
 
-// Публичная загрузка товара через /products/{handle}.js (без токена)
+// Public product fetch via /products/{handle}.js (no token)
 async function fetchPublicProduct(handle) {
 	if (!handle) return null
 
-	// Проверяем кэш
+	// Check cache
 	if (productCache.has(handle)) {
 		return productCache.get(handle)
 	}
@@ -362,11 +362,11 @@ async function fetchPublicProduct(handle) {
 	}
 }
 
-// Загрузка товара из Shopify по handle
+// Load product from Shopify by handle
 async function fetchShopifyProduct(handle) {
 	if (!handle) return null
 
-	// Проверяем кэш
+	// Check cache
 	if (productCache.has(handle)) {
 		return productCache.get(handle)
 	}
@@ -437,7 +437,7 @@ async function fetchShopifyProduct(handle) {
 		const product = data?.data?.product
 
 		if (product) {
-			// Преобразуем в удобный формат
+			// Convert to a convenient format
 			const formatted = {
 				id: product.id,
 				handle: product.handle,
@@ -469,7 +469,7 @@ async function fetchShopifyProduct(handle) {
 				tags: product.tags,
 			}
 
-			// Сохраняем в кэш
+			// Save to cache
 			productCache.set(handle, formatted)
 			return formatted
 		}
@@ -481,24 +481,24 @@ async function fetchShopifyProduct(handle) {
 	}
 }
 
-// Загрузка нескольких товаров параллельно
+// Load multiple products in parallel
 async function fetchShopifyProducts(handles) {
 	const results = await Promise.all(handles.map(h => fetchShopifyProduct(h)))
 	return results.filter(Boolean)
 }
 
-// Обогащение hotspot данными из Shopify
+// Enrich hotspot with Shopify data
 async function enrichHotspotWithShopify(hotspot) {
 	if (!hotspot.shopify_handle || hotspot.shopify_handle === '#') {
-		// Нет shopify_handle - используем fallback если есть
+		// No shopify_handle — use fallback if available
 		return withFallbackHotspot(hotspot)
 	}
 
-	// Пытаемся загрузить из Shopify
+	// Try to load from Shopify
 	const product = await fetchShopifyProduct(hotspot.shopify_handle)
 
 	if (product) {
-		// Успешно загрузили из Shopify
+		// Successfully loaded from Shopify
 		return {
 			...hotspot,
 			...product,
@@ -508,11 +508,11 @@ async function enrichHotspotWithShopify(hotspot) {
 		}
 	}
 
-	// Shopify не ответил - используем fallback если есть
+	// Shopify didn't respond — use fallback if available
 	return withFallbackHotspot(hotspot)
 }
 
-// Обогащение всех hotspots в комнате
+// Enrich all hotspots in the room
 async function enrichRoomHotspots(room) {
 	if (!room.hotspots || !room.hotspots.length) return room
 
@@ -540,7 +540,7 @@ async function loadData() {
 		if (!res.ok) throw new Error(res.statusText)
 		const json = normalizeDataImages(await res.json())
 
-		// Сохраняем конфиг Shopify
+		// Store Shopify config
 		shopifyConfig = json.shopify_config || null
 
 		rooms = json && json.gallery_scenes ? json.gallery_scenes : []
@@ -699,15 +699,15 @@ async function updateFloatingProducts(room) {
 		if (room.inventory && room.inventory.length) {
 			items = room.inventory.slice()
 		} else if (room.hotspots && room.hotspots.length) {
-			// Обрабатываем hotspots с fallback и Shopify
+			// Process hotspots with fallback and Shopify
 			items = await Promise.all(
 				room.hotspots.map(async h => {
-					// Если уже обогащён данными
+					// If already enriched with data
 					if (h._enriched || h.product_name) {
 						return { ...h }
 					}
 
-					// Пытаемся загрузить из Shopify
+					// Try to load from Shopify
 					if (
 						h.shopify_handle &&
 						h.shopify_handle !== '#' &&
@@ -726,7 +726,7 @@ async function updateFloatingProducts(room) {
 						}
 					}
 
-					// Используем fallback данные
+					// Use fallback data
 					return withFallbackHotspot(h)
 				}),
 			)
@@ -735,7 +735,7 @@ async function updateFloatingProducts(room) {
 		}
 	}
 
-	// Фильтруем только товары с данными
+	// Filter only items with data
 	items = items.filter(
 		item =>
 			item.product_name ||
@@ -755,7 +755,7 @@ async function updateFloatingProducts(room) {
 			const slot = allSlots[slotIndex]
 			const product = items[i]
 
-			// Получаем данные (из product напрямую или из fallback)
+			// Get data (from product directly or from fallback)
 			const {
 				rawName,
 				name,
@@ -782,10 +782,10 @@ async function updateFloatingProducts(room) {
 </div>
 `
 
-			// Клик открывает Sheet с информацией о товаре
+			// Click opens the Sheet with product info
 			slot.onclick = e => {
 				e.stopPropagation()
-				// Находим комнату и hotspot
+				// Find the room and hotspot
 				const roomIndex = rooms.findIndex(r => r.id === room.id)
 				if (roomIndex !== -1) {
 					openSheet(product)
@@ -994,7 +994,7 @@ function renderHotspots(room, container) {
 		dot.style.top = hs.y || hs.top || hs.lat || '50%'
 		dot.setAttribute('data-hotspot-index', idx)
 
-		// Если есть shopify_handle, показываем индикатор загрузки
+		// If there is a shopify_handle, show a loading indicator
 		if (hs.shopify_handle && !hs.product_name) {
 			dot.classList.add('loading')
 			dot.title = 'Loading...'
@@ -1013,11 +1013,11 @@ function renderHotspots(room, container) {
 				.forEach(d => d.classList.remove('active-hotspot'))
 			dot.classList.add('active-hotspot')
 
-			// Если есть shopify_handle, загружаем данные из Shopify
+			// If there is a shopify_handle, load data from Shopify
 			if (hs.shopify_handle && !hs._enriched) {
 				dot.classList.add('loading')
 				const enriched = await enrichHotspotWithShopify(hs)
-				// Обновляем hotspot в массиве
+				// Update hotspot in the array
 				Object.assign(hs, enriched, { _enriched: true })
 				dot.classList.remove('loading')
 				dot.title = hs.product_name || hs.title || ''
@@ -1249,12 +1249,12 @@ function openRoomViewer(roomId) {
 	if (gv) {
 		gv.classList.remove('hidden')
 		gv.style.display = 'flex'
-		// Закрытие при клике на overlay (но не на контент)
+		// Close on overlay click (but not on content)
 		gv.onclick = e => {
 			const wrapper = document.getElementById('viewer-media-wrapper')
 			const img = document.getElementById('viewer-img')
 			const hotspots = document.getElementById('hotspots-container')
-			// Закрываем только если клик НЕ на изображении, hotspots или кнопках
+			// Close only if the click is NOT on the image, hotspots, or buttons
 			const isClickOnContent =
 				(wrapper && wrapper.contains(e.target)) ||
 				(img && img.contains(e.target)) ||
@@ -1550,11 +1550,11 @@ function renderGallery() {
 	rooms.forEach((scene, index) => {
 		const el = document.createElement('article')
 
-		// ОСНОВНОЙ КОНТЕЙНЕР (Рамка со свечением и блюром)
+		// MAIN CONTAINER (glow + blur frame)
 		el.className =
 			'group reveal reveal-bottom relative p-6 rounded-[2rem] border border-white/5 bg-gradient-to-b from-white/[0.08] to-transparent backdrop-blur-2xl transition-all duration-500 hover:-translate-y-3 hover:border-purple-500/40 hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.2)] flex flex-col justify-between cursor-pointer overflow-hidden'
 
-		// Задержка анимации появления
+		// Reveal animation delay
 		el.style.transitionDelay = `${(index % 3) * 0.1}s`
 
 		el.innerHTML = `
@@ -1599,7 +1599,7 @@ function initDemoModule() {
 		demoPreviewWrapper.innerHTML = rooms
 			.slice(0, limit)
 			.map((room, idx) => {
-				// Берём до 3 hotspots для демо
+				// Take up to 3 hotspots for the demo
 				const demoHotspots = (room.hotspots || []).slice(0, 3)
 				const hotspotsHtml = demoHotspots
 					.map(
@@ -1711,18 +1711,17 @@ function openSheet(roomIdxOrSpot, spotIdx) {
       ${
 			price
 				? `
-					${hasVariants ? `<div class="text-[9px] uppercase tracking-[0.2em] text-white/50 text-center mb-2">${variantsLabel}</div>` : ''}
 					<button
 						class="relative w-full group/btn active:scale-95 transition-all duration-200 mt-2 js-add-to-cart"
 						data-add-to-cart="true"
-						data-handle="${handleValue}"
+						data-handle="${handleValue}" 
 						data-title="${safeTitle}"
 						data-price="${price}"
 						data-image="${safeImage}"
 						data-close-sheet="true"
 					>
         
-    			    <div class="relative bg-white text-black text-[7px] font-bold uppercase tracking-[0.2em] py-1 px-12 w-fit mx-auto rounded-t-lg -mb-[8px] z-10 transition-colors group-hover/btn:bg-purple-600 group-hover/btn:text-white">
+    			    <div class="relative text-white text-[8px] font-bold uppercase tracking-[0.2em] py-1 px-20 w-fit mx-auto rounded-t-lg -mb-[5px] z-10 group-hover/btn:text-purple-600">
     			        Has more options
     			    </div>
 
@@ -1816,16 +1815,16 @@ onDomReady(() => {
 
 /* -------------------- Gallery Page Specifics -------------------- */
 
-// 1. Функция инициализации верхней карусели
+// 1. Top carousel initialization function
 function initGalleryHero() {
 	const wrapper = document.getElementById('gallery-hero-wrapper')
 
-	// Если обертка скрыта или отсутствует (на телефоне), просто выходим из функции
+	// If the wrapper is hidden or missing (on mobile), just exit
 	if (!wrapper || window.innerWidth < 768) {
 		return
 	}
 
-	// Выбираем 10 случайных комнат
+	// Pick 10 random rooms
 	const randomSlides = [...rooms].sort(() => 0.5 - Math.random()).slice(0, 10)
 
 	wrapper.innerHTML = randomSlides
@@ -1848,15 +1847,15 @@ function initGalleryHero() {
 		)
 		.join('')
 
-	// Удаляем старый экземпляр Swiper, если он есть
+	// Remove old Swiper instance if it exists
 	if (window.galleryHeroSwiper) {
 		window.galleryHeroSwiper.destroy(true, true)
 	}
 
-	// Инициализация Swiper
+	// Swiper initialization
 	window.galleryHeroSwiper = new Swiper('.galleryHeroSwiper', {
 		loop: true,
-		// Настройки по умолчанию (для мобильных)
+		// Default settings (for mobile)
 		slidesPerView: 1.2,
 		centeredSlides: true,
 		spaceBetween: 16,
@@ -1866,9 +1865,9 @@ function initGalleryHero() {
 			delay: 3000,
 			disableOnInteraction: false,
 		},
-		// Адаптация под разные экраны
+		// Responsive adjustments
 		breakpoints: {
-			// Для десктопов (ширина > 768px)
+			// For desktops (width > 768px)
 			769: {
 				slidesPerView: 'auto',
 				centeredSlides: false,
@@ -1884,9 +1883,9 @@ function initGalleryHero() {
 }
 
 onDomReady(() => {
-	// Ждем пока loadData отработает (она асинхронна),
-	// поэтому используем простой поллинг или перехватываем выполнение.
-	// Самый надежный способ без изменения верха скрипта:
+	// Wait for loadData to finish (it's async),
+	// so we use simple polling or intercept execution.
+	// Most reliable approach without changing the top of the script:
 
 	const checkDataInterval = setInterval(() => {
 		if (typeof rooms !== 'undefined' && rooms.length > 0) {
@@ -2004,34 +2003,34 @@ function initSpaceSwitcher() {
 	function updateTheme() {
 		const theme = themes[current]
 
-		// 1. Очищаем старые объекты
+		// 1. Clear old objects
 		decoContainer.innerHTML = ''
 
-		// 2. Меняем стиль текста
+		// 2. Update text style
 		word.className = `transition-all duration-700 inline-block ${theme.textClass}`
 
-		// 3. Создаем новые объекты
+		// 3. Create new objects
 		theme.objects.forEach((obj, i) => {
 			const el = document.createElement('div')
 			el.className = `deco-object ${obj.pos}`
 			el.innerHTML = obj.html
 			decoContainer.appendChild(el)
 
-			// Плавное появление
+			// Smooth fade-in
 			setTimeout(() => el.classList.add('active'), i * 100)
 		})
 
 		current = (current + 1) % themes.length
 	}
 
-	updateTheme() // Первый запуск
+	updateTheme() // First run
 	setInterval(updateTheme, 4000)
 }
 
-// Запуск при загрузке страницы
+// Run on page load
 onDomReady(initSpaceSwitcher)
 
-// Находим элементы и инициализируем поведение после загрузки DOM
+// Find elements and initialize behavior after DOM load
 function initMenu() {
 	const menuToggle = document.getElementById('menu-toggle')
 	const mobileMenu = document.getElementById('mobile-menu')
@@ -2560,7 +2559,7 @@ window.addAnimationProductToCart = function (buttonEl) {
 	}
 }
 
-// Пульсация бейджа корзины
+// Cart badge pulse
 function pulseBadge() {
 	const badge = document.getElementById('header-cart-count')
 	if (badge) {
@@ -2825,13 +2824,6 @@ function pulseBadge() {
 	function renderProductPage(product) {
 		// Source indicator
 		const sourceEl = document.getElementById('product-source')
-		if (sourceEl) {
-			if (product.source === 'shopify') {
-				sourceEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[8px] text-green-400 uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>In stock</span>`
-			} else {
-				sourceEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[8px] text-white/30 uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-white/30 rounded-full"></span>Local preview</span>`
-			}
-		}
 
 		// Breadcrumbs
 		const breadCategory = document.getElementById('breadcrumb-category')
