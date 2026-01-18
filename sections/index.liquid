@@ -246,58 +246,6 @@
 	</div>
 </div>
 
-<section id="assortment" class="relative py-20 overflow-hidden">
-	<div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-10">
-		<h2 class="text-center text-[5vw] font-black text-outline uppercase leading-none mb-20">Assortment</h2>
-
-		<!-- Dynamic Product Grid - Populated by script.js -->
-		<div id="assortment-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-			<!-- Products will be rendered here dynamically -->
-			<!-- Fallback for no-JS (Liquid) -->
-			{% assign featured_product = section.settings.assortment_product %}
-			{% if featured_product != blank %}
-				<article class="group p-7 min-h-[320px] rounded-[2rem] border border-white/5 bg-gradient-to-b from-white/[0.05] to-transparent backdrop-blur-2xl transition-all duration-500 hover:-translate-y-3 hover:border-purple-500/40 hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.2)] flex flex-col justify-between">
-					<a href="{{ featured_product.url }}" class="block">
-						<div class="h-64 w-full overflow-hidden rounded-2xl mb-6 relative bg-[#0a0a0a]">
-							{% if featured_product.featured_image %}
-								<img
-									src="{{ featured_product.featured_image | image_url: width: 900 }}"
-									alt="{{ featured_product.title | escape }}"
-									loading="lazy"
-									class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-								/>
-							{% else %}
-								<div class="w-full h-full flex items-center justify-center text-white/30 text-xs uppercase tracking-widest">No image</div>
-							{% endif %}
-						</div>
-					</a>
-					<div class="flex justify-between items-end">
-						<div>
-							<h3 class="text-xl font-black uppercase tracking-tight text-white">{{ featured_product.title }}</h3>
-							<p class="text-white/50 text-[11px] mt-2">{{ featured_product.description | strip_html | truncate: 90 }}</p>
-						</div>
-						<div class="text-lg font-mono font-bold">{{ featured_product.price | money }}</div>
-					</div>
-					<div class="mt-6">
-						<a href="{{ featured_product.url }}" class="block text-center text-[10px] uppercase tracking-widest text-purple-400 hover:text-purple-300 transition-colors">
-							More details →
-						</a>
-					</div>
-				</article>
-			{% else %}
-				<div class="col-span-full text-white/50 text-sm">Select a product in the Index section settings.</div>
-			{% endif %}
-		</div>
-
-		<div class="reveal reveal-bottom mt-16 flex justify-center">
-			<div class="inline-flex items-center gap-4 px-6 py-3 border border-white/10 rounded-full bg-black/50 backdrop-blur-md">
-				<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-				<span class="text-[10px] uppercase tracking-widest text-white/60">Free shipping worldwide</span>
-			</div>
-		</div>
-	</div>
-</section>
-
 <section id="CozySpot-trust" class="relative py-32 px-6 lg:px-40 overflow-hidden">
 	<div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-600/10 blur-[150px] rounded-full animate-pulse"></div>
 	<div class="absolute bottom-0 right-0 w-[300px] h-[300px] bg-blue-600/10 blur-[100px] rounded-full"></div>
@@ -526,13 +474,7 @@
 {% schema %}
 {
 	"name": "Index",
-	"settings": [
-		{
-			"type": "product",
-			"id": "assortment_product",
-			"label": "Assortment fallback product"
-		}
-	],
+	"settings": [],
 	"blocks": [],
 	"presets": [{ "name": "Home", "category": "Pages" }]
 }

@@ -101,52 +101,6 @@
 		}
 	},
 
-	"featured_products": [
-		{
-			"shopify_handle": "#",
-			"fallback": {
-				"title": "No connection to the database",
-				"category": "N/A",
-				"description": "N/A",
-				"price": null,
-				"old_price": null,
-				"currency": "€",
-				"image": null,
-				"badge": "In Stock",
-				"badge_style": "default"
-			}
-		},
-		{
-			"shopify_handle": "cloud-neon-light-logo-usb-or-battery-powered-novel-night-light-used-to-decorate-girls-bedrooms-birthday-party-gifts-wedding",
-			"fallback": {
-				"title": "Loft Lamp Pro",
-				"category": "Workspace",
-				"description": "Aluminum housing, warm light. Perfect for your desk setup.",
-				"price": "89",
-				"currency": "€",
-				"image": "min-01.jpg",
-				"badge": "Hot",
-				"badge_style": "hot",
-				"featured": true,
-				"rating": "4.8",
-				"reviews_count": "124"
-			}
-		},
-		{
-			"shopify_handle": "#",
-			"fallback": {
-				"title": "N/A",
-				"category": "N/A",
-				"description": "N/A",
-				"price": null,
-				"currency": "€",
-				"image": null,
-				"badge": null,
-				"badge_style": null
-			}
-		}
-	],
-
 	"gallery_scenes": [
 		{
 			"id": "scene-1",

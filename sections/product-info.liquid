@@ -91,6 +91,11 @@
 				<!-- Title -->
 				<h1 id="product-title" class="text-4xl lg:text-5xl font-black italic uppercase tracking-tight leading-none mb-4">{{ product.title }}</h1>
 
+				<!-- Judge.me Badge -->
+				<div class="mb-4">
+					{{ product.metafields.judgeme.badge }}
+				</div>
+
 				<!-- Rating -->
 				<div id="product-rating" class="flex items-center gap-3 mb-6 hidden">
 					<div class="flex items-center gap-0.5" id="product-stars">
@@ -362,34 +367,7 @@
 			<!-- Reviews Tab -->
 			<div id="tab-reviews" class="product-tab-content hidden">
 				<div class="max-w-3xl">
-					<!-- Reviews Summary -->
-					<div class="flex flex-col sm:flex-row gap-8 mb-10 pb-10 border-b border-white/10">
-						<div class="text-center sm:text-left">
-							<div id="reviews-average" class="text-6xl font-black">0.0</div>
-							<div id="reviews-stars-summary" class="flex items-center justify-center sm:justify-start gap-1 mt-2">
-								<!-- Stars will be injected -->
-							</div>
-							<div id="reviews-total" class="text-sm text-white/40 mt-1">Based on 0 reviews</div>
-						</div>
-						<div class="flex-1">
-							<!-- Rating breakdown bars -->
-							<div id="reviews-breakdown" class="space-y-2">
-								<!-- Will be injected -->
-							</div>
-						</div>
-					</div>
-
-					<!-- Reviews List -->
-					<div id="reviews-list" class="space-y-6">
-						<p class="text-white/40 text-sm">No reviews yet. Be the first to review this product!</p>
-					</div>
-
-					<!-- Write Review Button -->
-					<button
-						class="mt-8 border border-white/20 hover:bg-white hover:text-black text-white py-3 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors"
-					>
-						Write a Review
-					</button>
+					{{ product.metafields.judgeme.widget }}
 				</div>
 			</div>
 		</div>

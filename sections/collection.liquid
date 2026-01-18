@@ -23,6 +23,9 @@
         {% endif %}
         <div class="collection-product__content">
           <p>{{ product.title | escape | link_to: product.url }}</p>
+          <div class="collection-product__reviews">
+            {{ product.metafields.judgeme.badge }}
+          </div>
           <p>{{ product.price | money }}</p>
         </div>
       </div>

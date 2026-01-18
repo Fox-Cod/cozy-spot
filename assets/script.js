@@ -199,20 +199,79 @@ document.addEventListener('mousemove', e => {
 let shopifyConfig = null
 const productCache = new Map() // Кэш товаров по handle
 
-// Загрузка товара из Shopify по handle
-async function fetchShopifyProduct(handle) {
-	if (
-		!shopifyConfig ||
-		!shopifyConfig.store_domain ||
-		!shopifyConfig.storefront_access_token
-	) {
-		console.warn('Shopify config not set')
-		return null
-	}
+// Публичная загрузка товара через /products/{handle}.js (без токена)
+async function fetchPublicProduct(handle) {
+	if (!handle) return null
 
 	// Проверяем кэш
 	if (productCache.has(handle)) {
 		return productCache.get(handle)
+	}
+
+	try {
+		const response = await fetch(`/products/${handle}.js`)
+		if (!response.ok)
+			throw new Error(`Public product error: ${response.status}`)
+		const product = await response.json()
+
+		const firstVariant = product.variants?.[0] || null
+		const currency =
+			window?.Shopify?.currency?.active ||
+			window?.Shopify?.currency?.default ||
+			'USD'
+		const toPrice = value =>
+			typeof value === 'number' ? (value / 100).toFixed(2) : null
+
+		const formatted = {
+			id: product.id,
+			handle: product.handle,
+			product_name: product.title,
+			title: product.title,
+			description: product.description || '',
+			img: product.featured_image || product.images?.[0] || '',
+			images: product.images || [],
+			price: firstVariant ? toPrice(firstVariant.price) : null,
+			currency,
+			compareAtPrice: firstVariant
+				? toPrice(firstVariant.compare_at_price)
+				: null,
+			available: product.available,
+			variants:
+				product.variants?.map(v => ({
+					id: v.id,
+					title: v.title,
+					price: toPrice(v.price),
+					available: v.available,
+				})) || [],
+			vendor: product.vendor,
+			productType: product.type,
+			tags: product.tags || [],
+		}
+
+		productCache.set(handle, formatted)
+		return formatted
+	} catch (err) {
+		console.error(`Failed to fetch public product "${handle}":`, err)
+		return null
+	}
+}
+
+// Загрузка товара из Shopify по handle
+async function fetchShopifyProduct(handle) {
+	if (!handle) return null
+
+	// Проверяем кэш
+	if (productCache.has(handle)) {
+		return productCache.get(handle)
+	}
+
+	const canUseStorefront =
+		shopifyConfig?.store_domain &&
+		shopifyConfig?.storefront_access_token &&
+		shopifyConfig.storefront_access_token !== 'PASTE_STOREFRONT_TOKEN_HERE'
+
+	if (!canUseStorefront) {
+		return fetchPublicProduct(handle)
 	}
 
 	const query = `{
@@ -380,306 +439,12 @@ async function enrichRoomHotspots(room) {
 	}
 }
 
-/* -------------------- Featured Products (Assortment Section) -------------------- */
-let featuredProducts = []
-
-// Дефолтная картинка-заглушка
-const DEFAULT_PRODUCT_IMAGE =
-	'data:image/svg+xml,' +
-	encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
-  <rect width="400" height="300" fill="#0a0a0a"/>
-  <rect x="1" y="1" width="398" height="298" stroke="#222" stroke-width="2" fill="none" stroke-dasharray="8 4"/>
-  <text x="200" y="140" text-anchor="middle" fill="#444" font-family="system-ui" font-size="14" font-weight="bold">COMING SOON</text>
-  <text x="200" y="165" text-anchor="middle" fill="#333" font-family="system-ui" font-size="11">Product image loading...</text>
-  <circle cx="200" cy="200" r="20" stroke="#a855f7" stroke-width="2" fill="none" opacity="0.3"/>
-  <path d="M200 185 L200 215 M185 200 L215 200" stroke="#a855f7" stroke-width="2" opacity="0.3"/>
-</svg>
-`)
-
-// Получить данные о товаре (Shopify или fallback)
-async function getFeaturedProductData(productConfig) {
-	const { shopify_handle, fallback } = productConfig
-
-	// Пытаемся загрузить из Shopify
-	if (
-		shopify_handle &&
-		shopifyConfig?.store_domain &&
-		shopifyConfig?.storefront_access_token !==
-			'YOUR_STOREFRONT_ACCESS_TOKEN'
-	) {
-		const shopifyData = await fetchShopifyProduct(shopify_handle)
-		if (shopifyData) {
-			return {
-				source: 'shopify',
-				title: shopifyData.title || shopifyData.product_name,
-				category:
-					shopifyData.productType || fallback?.category || 'Product',
-				description:
-					shopifyData.description || fallback?.description || '',
-				price: shopifyData.price,
-				old_price: shopifyData.compareAtPrice,
-				currency:
-					shopifyData.currency === 'EUR'
-						? '€'
-						: shopifyData.currency === 'USD'
-							? '$'
-							: shopifyData.currency,
-				image:
-					shopifyData.img ||
-					shopifyData.images?.[0] ||
-					fallback?.image ||
-					DEFAULT_PRODUCT_IMAGE,
-				badge: fallback?.badge,
-				badge_style: fallback?.badge_style,
-				featured: fallback?.featured || false,
-				available: shopifyData.available,
-				rating: shopifyData.rating || fallback?.rating || null,
-				reviews_count:
-					shopifyData.reviews_count ||
-					fallback?.reviews_count ||
-					null,
-				shopify_handle,
-				link: `https://${shopifyConfig.store_domain}/products/${shopify_handle}`,
-			}
-		}
-	}
-
-	// Возвращаем fallback данные
-	return {
-		source: 'fallback',
-		title: fallback?.title || 'Coming Soon',
-		category: fallback?.category || 'Product',
-		description:
-			fallback?.description || 'This product will be available soon.',
-		price: fallback?.price || null,
-		old_price: fallback?.old_price || null,
-		currency: fallback?.currency || '€',
-		image: fallback?.image || DEFAULT_PRODUCT_IMAGE,
-		badge: fallback?.badge,
-		badge_style: fallback?.badge_style,
-		featured: fallback?.featured || false,
-		available: fallback?.price ? true : false,
-		rating: fallback?.rating || null,
-		reviews_count: fallback?.reviews_count || null,
-		shopify_handle,
-		link: shopify_handle ? '#' : null,
-	}
-}
-
-// Рендеринг карточки товара
-function renderProductCard(product, index) {
-	const isFeatured = product.featured
-	const hasPrice = product.price && product.price !== 'N/A'
-	const hasOldPrice = product.old_price && product.old_price !== 'N/A'
-	const isFromShopify = product.source === 'shopify'
-	const imageIsDefault =
-		!product.image ||
-		product.image === DEFAULT_PRODUCT_IMAGE ||
-		product.image.startsWith('data:image/svg')
-
-	// Badge HTML
-	let badgeHtml = ''
-	if (product.badge) {
-		const badgeClass =
-			product.badge_style === 'hot'
-				? 'bg-red-500 text-white'
-				: 'bg-white text-black'
-		badgeHtml = `<div class="absolute top-4 right-4 ${badgeClass} text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wider z-[9999]">${product.badge}</div>`
-	}
-
-	// Rating HTML
-	const rating = product.rating || null
-	const reviewsCount = product.reviews_count || null
-	const ratingHtml = rating
-		? `<div class="flex items-center gap-1 mt-2">
-			<div class="flex items-center gap-0.5">
-				${Array(5)
-					.fill(0)
-					.map(
-						(_, i) =>
-							`<span class="text-[10px] ${i < Math.floor(parseFloat(rating)) ? 'text-yellow-500' : 'text-white/20'}">★</span>`,
-					)
-					.join('')}
-			</div>
-			<span class="text-[10px] text-white/60">${rating}</span>
-			${reviewsCount ? `<span class="text-[8px] text-white/30">(${reviewsCount})</span>` : ''}
-		</div>`
-		: ''
-
-	// Shopify source indicator
-	const sourceIndicator = isFromShopify
-		? `<span class="inline-flex items-center gap-1 text-[8px] text-green-400 uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>Live from Shopify</span>`
-		: `<span class="text-[8px] text-white/30 uppercase tracking-wider">Local preview</span>`
-
-	// Price HTML
-	let priceHtml = ''
-	if (hasPrice) {
-		if (hasOldPrice) {
-			priceHtml = `
-				<div class="text-sm line-through text-white/30">${product.old_price}${product.currency}</div>
-				<div class="text-2xl font-mono font-bold ${product.badge_style === 'hot' ? 'text-red-400' : 'text-white'}">${product.price}${product.currency}</div>
-			`
-		} else {
-			priceHtml = `<div class="text-lg font-mono font-bold">${product.price}${product.currency}</div>`
-		}
-	} else {
-		priceHtml = `<div class="text-sm font-mono text-white/40">Coming soon</div>`
-	}
-
-	// Button HTML
-	let buttonHtml = ''
-	const moreDetailsLink = `
-		<a 
-			href="${getProductUrl(product.shopify_handle)}"
-			class="block text-center mt-3 text-[10px] uppercase tracking-widest text-purple-400 hover:text-purple-300 transition-colors"
-		>
-			More details →
-		</a>
-	`
-	if (hasPrice && product.available) {
-		if (isFeatured) {
-			buttonHtml = `
-				<button 
-					class="w-full mt-6 bg-white text-black py-4 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-colors"
-					onclick="handleAddToCart('${product.shopify_handle}', this)"
-					${!isFromShopify ? 'data-local="true"' : ''}
-				>
-					Quick Buy
-				</button>
-				${moreDetailsLink}
-			`
-		} else {
-			buttonHtml = `
-				<button 
-					class="w-full mt-6 border border-white/20 hover:bg-white hover:text-black text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors"
-					onclick="handleAddToCart('${product.shopify_handle}', this)"
-					${!isFromShopify ? 'data-local="true"' : ''}
-				>
-					Add to Cart
-				</button>
-				${moreDetailsLink}
-			`
-		}
-	} else {
-		buttonHtml = `
-			<button 
-				class="w-full mt-6 border border-white/10 text-white/40 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed"
-				disabled
-			>
-				Coming Soon
-			</button>
-			${moreDetailsLink}
-		`
-	}
-
-	// Image HTML with overlay for default
-	const imageOverlay = imageIsDefault
-		? `<div class="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-				<div class="text-center">
-					<div class="text-purple-500 text-2xl mb-2">✦</div>
-					<div class="text-[10px] text-white/60 uppercase tracking-widest">Preview</div>
-				</div>
-			</div>`
-		: ''
-
-	const extraImageContent =
-		isFeatured && product.image && !imageIsDefault
-			? `<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-				<span class="text-xs text-white/80 font-mono">${product.description.split('.')[0]}</span>
-			</div>`
-			: ''
-
-	return `
-		<div
-			class="reveal reveal-bottom group relative p-7 min-h-[320px] rounded-[2rem] border border-white/5 bg-gradient-to-b from-white/[0.05] to-transparent backdrop-blur-2xl transition-all duration-500 hover:-translate-y-3 hover:border-purple-500/40 hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.2)] flex flex-col justify-between ${isFeatured ? 'md:-mt-12' : ''}"
-			style="transition-delay: ${0.1 + index * 0.1}s"
-			data-product-handle="${product.shopify_handle || ''}"
-			data-product-source="${product.source}"
-		>
-			${badgeHtml}
-			<div class="${isFeatured ? 'h-64' : 'h-48'} w-full overflow-hidden rounded-2xl mb-6 relative">
-				<img 
-					src="${product.image || DEFAULT_PRODUCT_IMAGE}" 
-					class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${imageIsDefault ? 'opacity-60' : ''}" 
-					alt="${product.title}"
-					onerror="this.src='${DEFAULT_PRODUCT_IMAGE}'; this.classList.add('opacity-60')"
-				/>
-				${imageOverlay}
-				${extraImageContent}
-			</div>
-			<div class="flex justify-between items-end">
-				<div>
-					<span class="${product.badge_style === 'hot' ? 'text-red-400' : 'text-white/40'} text-[10px] uppercase tracking-widest">${product.category}</span>
-					<h4 class="${isFeatured ? 'text-2xl font-black' : 'text-xl font-bold'} italic uppercase mt-1">${product.title}</h4>
-					<div class="mt-2 text-gray-400 text-xs line-clamp-1">${product.description}</div>
-					${ratingHtml}
-					<div class="mt-2">${sourceIndicator}</div>
-				</div>
-				<div class="text-right">
-					${priceHtml}
-				</div>
-			</div>
-			${buttonHtml}
-		</div>
-	`
-}
-
-// Рендеринг всей секции Assortment
-async function renderAssortment() {
-	const container = document.getElementById('assortment-grid')
-	if (!container) return
-
-	// Показываем скелетон загрузки
-	container.innerHTML = `
-		<div class="col-span-full flex items-center justify-center py-20">
-			<div class="flex flex-col items-center gap-4">
-				<div class="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-				<span class="text-[10px] uppercase tracking-widest text-white/40">Loading products...</span>
-			</div>
-		</div>
-	`
-
-	try {
-		// Загружаем данные для каждого товара
-		const productDataPromises = featuredProducts.map(p =>
-			getFeaturedProductData(p),
-		)
-		const products = await Promise.all(productDataPromises)
-
-		// Рендерим карточки
-		container.innerHTML = products
-			.map((p, i) => renderProductCard(p, i))
-			.join('')
-
-		// Перезапускаем reveal анимации
-		if (typeof runReveal === 'function') runReveal()
-	} catch (err) {
-		console.error('Failed to render assortment:', err)
-		container.innerHTML = `
-			<div class="col-span-full text-center py-20">
-				<div class="text-purple-500 text-3xl mb-4">⚠</div>
-				<div class="text-white/60 text-sm">Failed to load products</div>
-				<button onclick="renderAssortment()" class="mt-4 text-[10px] uppercase tracking-widest text-purple-400 hover:text-purple-300 transition-colors">
-					Try again
-				</button>
-			</div>
-		`
-	}
-}
-
-// Обработчик добавления в корзину (обёртка для onclick)
-function handleAddToCart(handle, buttonEl) {
-	addToCart(handle, buttonEl)
-}
-
 /* -------------------- Data Loading -------------------- */
 let rooms = []
 async function loadData() {
 	const hasTargets =
 		document.getElementById('main-wrapper') ||
 		document.getElementById('demo-preview-wrapper') ||
-		document.getElementById('assortment-grid') ||
 		document.getElementById('dynamic-collection-grid') ||
 		document.getElementById('global-viewer')
 	if (!hasTargets || !dataUrl) return
@@ -691,15 +456,11 @@ async function loadData() {
 		// Сохраняем конфиг Shopify
 		shopifyConfig = json.shopify_config || null
 
-		// Сохраняем featured products
-		featuredProducts = json.featured_products || []
-
 		rooms = json && json.gallery_scenes ? json.gallery_scenes : []
 		populateMainWrapper()
 		renderCollection()
 		renderGallery()
 		initDemoModule()
-		renderAssortment() // Рендерим секцию товаров
 		// if swiper exists, update floating products
 		if (typeof swiper !== 'undefined' && rooms && rooms.length)
 			updateFloatingProducts(rooms[swiper.activeIndex % rooms.length])
@@ -922,14 +683,19 @@ async function updateFloatingProducts(room) {
 				product.title ||
 				'Product'
 			const name =
-				rawName.length > 27 ? rawName.slice(0, 27) + '...' : rawName
-			const rawDesc = product.description || product.desc || ''
-			const description =
-				rawDesc.length > 27 ? rawDesc.slice(0, 27) + '...' : rawDesc
+				rawName.length > 24 ? rawName.slice(0, 24) + '...' : rawName
 			const img = product.img || product.image || ''
 			const price =
 				product.price && product.price !== 'N/A' ? product.price : null
-			const currency = product.currency || '€'
+			const currencyCode = (product.currency || '')
+				.toString()
+				.toUpperCase()
+			const currencySymbolLocal =
+				currencyCode === 'EUR'
+					? '€'
+					: currencyCode === 'USD'
+						? '$'
+						: product.currency || '€'
 			const rating = product.rating || null
 			const reviewsCount = product.reviews_count || null
 			const isFromShopify = product.source === 'shopify'
@@ -945,14 +711,14 @@ async function updateFloatingProducts(room) {
 
 			// Индикатор источника данных
 			const sourceIndicator = isFromShopify
-				? `<span class="text-[7px] text-green-400 uppercase tracking-wider flex items-center gap-1"><span class="w-1 h-1 bg-green-500 rounded-full"></span>Live</span>`
+				? null
 				: product.source === 'fallback'
 					? `<span class="text-[7px] text-white/30 uppercase tracking-wider">Preview</span>`
 					: ''
 
 			// Цена
 			const priceHtml = price
-				? `<div class="text-[9px] font-bold text-purple-400">${price}${currency}</div>`
+				? `<div class="text-[9px] font-bold text-purple-400">${price}${currencySymbolLocal}</div>`
 				: ''
 
 			// Изображение или заглушка
@@ -961,10 +727,9 @@ async function updateFloatingProducts(room) {
 				: `<div class="w-full h-24 bg-zinc-800/50 rounded-lg mb-2 flex items-center justify-center border border-white/5"><span class="text-purple-500/50 text-lg">✦</span></div>`
 
 			slot.innerHTML = `
-				<div class="relative group cursor-pointer" role="button" tabindex="0" title="${rawDesc}">
+				<div class="relative group cursor-pointer" role="button" tabindex="0" title="${rawName}">
 					${imgHtml}
 					<div class="font-bold text-[10px] leading-tight group-hover:text-purple-400 transition-colors uppercase tracking-tight">${name}</div>
-					<div class="text-[9px] text-white/50 leading-tight mt-1 line-clamp-1">${description}</div>
 					${ratingHtml}
 					<div class="flex justify-between items-center mt-1">
 						${priceHtml}
@@ -1849,10 +1614,27 @@ function openSheet(roomIdxOrSpot, spotIdx) {
 	const overlay = document.getElementById('sheet-overlay')
 	const content = document.getElementById('sheet-content')
 	if (!content) return
-	const name = spot.product_name || spot.name || spot.title || 'Product'
+	const rawName = spot.product_name || spot.name || spot.title || 'Product'
+	const name = rawName.length > 24 ? `${rawName.slice(0, 24)}...` : rawName
 	const img = spot.img || spot.image || ''
 	const price = spot.price && spot.price !== 'N/A' ? spot.price : null
-	const description = spot.description || spot.desc || ''
+	const currencyCode = (spot.currency || '').toString().toUpperCase()
+	const currencySymbolLocal =
+		currencyCode === 'EUR'
+			? '€'
+			: currencyCode === 'USD'
+				? '$'
+				: spot.currency || '$'
+	const variantTitles = Array.isArray(spot.variants)
+		? spot.variants.map(v => v && v.title).filter(Boolean)
+		: []
+	const hasVariants =
+		variantTitles.length > 1 ||
+		(variantTitles.length === 1 &&
+			variantTitles[0].toLowerCase() !== 'default title')
+	const variantsLabel = hasVariants
+		? `Variants: ${variantTitles.slice(0, 3).join(' • ')}`
+		: ''
 	const link = spot.link || spot.url || null
 	const rating = spot.rating || null
 	const reviewsCount = spot.reviews_count || null
@@ -1889,7 +1671,7 @@ function openSheet(roomIdxOrSpot, spotIdx) {
         </div>
         <div class="text-right">
           <div class="text-xl font-black text-white" data-price="${price || 0}">${
-				price ? `${price}${spot.currency || '$'}` : ''
+				price ? `${price}${currencySymbolLocal}` : ''
 			}</div>
           ${
 				spot.oldPrice
@@ -1898,15 +1680,16 @@ function openSheet(roomIdxOrSpot, spotIdx) {
 			}
         </div>
       </div>
-      <p class="text-gray-400 text-[11px] leading-relaxed line-clamp-2">${description}</p>
       ${
 			price
-				? `<button onclick="addToCartFromSheet('${spot.shopify_handle || spot.id || 'product'}', '${name.replace(/'/g, "\\'")}', ${price}, '${img}')" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 hover:text-white transition-all active:scale-95 shadow-xl">Add to Cart</button>`
+				? `
+					${hasVariants ? `<div class="text-[9px] uppercase tracking-[0.2em] text-white/50 text-center mb-2">${variantsLabel}</div>` : ''}
+					<button onclick="addToCartFromSheet('${spot.shopify_handle || spot.id || 'product'}', '${rawName.replace(/'/g, "\\'")}', ${price}, '${img}')" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 hover:text-white transition-all active:scale-95 shadow-xl">Add to Cart</button>`
 				: link
 					? `<a href="${link}" target="_blank" class="w-full inline-flex items-center justify-center bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 hover:text-white transition-all shadow-xl">Learn more</a>`
 					: `<button class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest opacity-60 cursor-not-allowed" disabled>Coming soon</button>`
 		}
-		<a href="${getProductUrl(spot.shopify_handle || spot.id)}" class="block text-center text-purple-500 hover:text-purple-400 text-[11px] font-bold uppercase tracking-widest py-2 transition-colors">More details →</a>
+		<a href="${getProductUrl(spot.shopify_handle || spot.id)}" class="block text-center text-purple-500 hover:text-purple-400 text-[11px] font-bold uppercase tracking-widest transition-colors">More details →</a>
     </div>
   </div>
 `
