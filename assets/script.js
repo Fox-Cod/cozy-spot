@@ -2947,6 +2947,15 @@ function pulseBadge() {
 		if (stickyPrice) stickyPrice.textContent = `${currency}${price}`
 	}
 
+	function updateAddToCartButtonVariant(variant) {
+		const addBtn = document.getElementById('add-to-cart-btn')
+		if (!addBtn || !variant) return
+		addBtn.dataset.variantId = variant.id || ''
+		if (variant.price) addBtn.dataset.price = variant.price
+		if (variant.image)
+			addBtn.dataset.image = resolveAssetImage(variant.image)
+	}
+
 	// Render product images
 	function renderProductImages(images) {
 		const mainWrapper = document.getElementById('product-main-images')
@@ -3040,6 +3049,7 @@ function pulseBadge() {
 				if (selectedName && colorVariants[0]) {
 					selectedName.textContent = colorVariants[0].title
 					selectedVariant = colorVariants[0]
+					updateAddToCartButtonVariant(selectedVariant)
 				}
 			}
 		}
@@ -3067,6 +3077,12 @@ function pulseBadge() {
 				`,
 					)
 					.join('')
+
+				if (sizeVariants[0]) {
+					selectedVariant = sizeVariants[0]
+					updateAddToCartButtonVariant(selectedVariant)
+					updateVariantPriceDisplay(selectedVariant.price)
+				}
 			}
 		}
 	}
@@ -3387,6 +3403,7 @@ function pulseBadge() {
 			title: btn.dataset.variantTitle,
 			price: btn.dataset.variantPrice,
 		}
+		updateAddToCartButtonVariant(selectedVariant)
 	}
 
 	window.selectSizeVariant = function (btn) {
@@ -3414,6 +3431,7 @@ function pulseBadge() {
 			id: btn.dataset.variantId,
 			price: btn.dataset.variantPrice,
 		}
+		updateAddToCartButtonVariant(selectedVariant)
 	}
 
 	// Tab switching
