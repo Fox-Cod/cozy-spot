@@ -2283,7 +2283,6 @@ const CartDrawer = (function () {
 					if (!res.ok) throw new Error('Add to cart failed')
 					return refresh()
 				})
-				.then(open)
 				.catch(err => console.warn('[CartDrawer] Add failed:', err))
 				.finally(() => setLoading(false))
 		})
@@ -2461,7 +2460,6 @@ async function addToCart(productInput) {
 	}
 	if (shopifyAdded) {
 		CartDrawer.refresh()
-		CartDrawer.open()
 	}
 
 	return { ok: shopifyAdded, product: localProduct }
