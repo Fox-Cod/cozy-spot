@@ -6,7 +6,7 @@
 
 	<div id="scroll-progress"></div>
 
-	<div class="mt-16 corner-widget top-left hidden lg:block">
+	<div class="mt-14 corner-widget top-left hidden lg:block">
 		<div id="live-clock">00:00:00</div>
 		<div>System: Active</div>
 	</div>
@@ -24,7 +24,9 @@
 	</div>
 
 <nav class="site-nav full-width fixed top-0 w-full z-[100] px-4 md:px-10 py-4 flex justify-between items-center bg-black/60 backdrop-blur-xl border-b border-white/5">
-	<a href="{{ routes.root_url }}#main" class="text-xl font-black italic tracking-tighter z-[110] relative text-white logo-link"> CS.<span id="logo-suffix" class="ml-1"></span> </a>
+	<a href="{{ routes.root_url }}#main" class="z-[110] relative text-white logo-link">
+		<img src="{{ 'cozy-wh-logo-64x.png' | asset_url }}" alt="CozySpot" class="h-7 w-7 md:h-8 md:w-8 object-contain" style="transform: scale(2.2); transform-origin: center;" />
+	</a>
 
 	<div class="hidden md:flex gap-12">
 		<a href="{{ pages['showcase'].url | default: '/pages/showcase' }}" class="nav-link text-[11px] uppercase font-bold tracking-widest opacity-70 hover:opacity-100 transition">Showcase</a>

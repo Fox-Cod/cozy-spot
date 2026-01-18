@@ -24,9 +24,7 @@
         <div class="collection-product__content">
           <p>{{ product.title | escape | link_to: product.url }}</p>
           <div class="collection-product__reviews">
-            <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
-              {{ product.metafields.judgeme.badge }}
-            </div>
+            {% render 'jdgm-rating', product: product %}
           </div>
           <p>{{ product.price | money }}</p>
         </div>

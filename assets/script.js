@@ -67,6 +67,98 @@ const formatMoneyFromCents = cents => {
 	return (value / 100).toFixed(2)
 }
 
+const getCurrencySymbol = (code, fallback) => {
+	const normalized = (code || '').toString().toUpperCase()
+	if (normalized === 'EUR') return '€'
+	if (normalized === 'USD') return '$'
+	return code || fallback || currencySymbol || '$'
+}
+
+const onDomReady = handler => {
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', handler)
+	} else {
+		handler()
+	}
+}
+
+const getRatingData = product => {
+	if (!product || typeof product !== 'object') {
+		return { rating: '0.0', count: '0' }
+	}
+	const ratingValue = product.rating ?? product.reviews_rating
+	const countValue = product.reviews_count ?? product.reviewsCount
+	const ratingKey = product.id || null
+	const ratingFromMap =
+		ratingKey && window.productRatings
+			? window.productRatings[ratingKey]
+			: null
+	return {
+		rating: ratingFromMap?.rating ?? ratingValue ?? '0.0',
+		count: ratingFromMap?.count ?? countValue ?? '0',
+	}
+}
+
+const getDisplayProductData = product => {
+	const rawName =
+		product?.product_name ||
+		product?.name ||
+		product?.title ||
+		product?.fallback?.title ||
+		'Product'
+	const name = rawName.length > 24 ? `${rawName.slice(0, 24)}...` : rawName
+	const img = product?.img || product?.image || product?.fallback?.image || ''
+	const price =
+		product?.price && product?.price !== 'N/A' ? product.price : null
+	const currencySymbolLocal = getCurrencySymbol(product?.currency, '€')
+	const ratingData = getRatingData(product)
+	const link = product?.link || product?.url || null
+	const variantTitles = Array.isArray(product?.variants)
+		? product.variants.map(v => v && v.title).filter(Boolean)
+		: []
+	const hasVariants =
+		variantTitles.length > 1 ||
+		(variantTitles.length === 1 &&
+			variantTitles[0].toLowerCase() !== 'default title')
+	const variantsLabel = hasVariants
+		? `Variants: ${variantTitles.slice(0, 3).join(' • ')}`
+		: ''
+	return {
+		rawName,
+		name,
+		img,
+		price,
+		currencySymbolLocal,
+		ratingData,
+		link,
+		hasVariants,
+		variantsLabel,
+	}
+}
+
+const createRatingMarkup = (ratingData, countLabel, extraClass = '') => `
+<div class="flex items-center gap-1 ${extraClass}">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="#A855F7" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+    </svg>
+
+    <span class="text-white font-bold text-[14px] leading-none">${ratingData.rating}</span>
+
+    <span class="text-white/20 text-[10px] leading-none ml-0.5">(${ratingData.count} ${countLabel})</span>
+</div>
+`
+
+const withFallbackHotspot = hotspot => {
+	if (!hotspot?.fallback) return hotspot
+	return {
+		...hotspot,
+		...hotspot.fallback,
+		source: 'fallback',
+		top: hotspot.top,
+		left: hotspot.left,
+	}
+}
+
 const mapLiquidProductToPdp = liquidProduct => {
 	if (!liquidProduct) return null
 	const images = Array.isArray(liquidProduct.images)
@@ -122,18 +214,27 @@ const mapLiquidProductToPdp = liquidProduct => {
 })()
 
 /* -------------------- UI Interactions & Reveal -------------------- */
+let revealObserver = null
+const revealObserved = new WeakSet()
 const runReveal = () => {
-	const observer = new IntersectionObserver(
-		entries => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) entry.target.classList.add('active')
-			})
-		},
-		{ threshold: 0.1 },
-	)
-	document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+	if (!revealObserver) {
+		revealObserver = new IntersectionObserver(
+			entries => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting)
+						entry.target.classList.add('active')
+				})
+			},
+			{ threshold: 0.1 },
+		)
+	}
+	document.querySelectorAll('.reveal').forEach(el => {
+		if (revealObserved.has(el)) return
+		revealObserver.observe(el)
+		revealObserved.add(el)
+	})
 }
-window.addEventListener('DOMContentLoaded', runReveal)
+onDomReady(runReveal)
 
 /* -------------------- Mobile Menu (Event Delegation) -------------------- */
 // Using event delegation so it works regardless of when navigation.html loads
@@ -169,15 +270,18 @@ function openCartPanel() {
 }
 
 // Live clock
+let _clockEl = null
 setInterval(() => {
-	const clock = document.getElementById('live-clock')
-	if (clock) clock.textContent = new Date().toTimeString().split(' ')[0]
+	if (!_clockEl) _clockEl = document.getElementById('live-clock')
+	if (_clockEl) _clockEl.textContent = new Date().toTimeString().split(' ')[0]
 }, 1000)
 
 // Mouse coords reaction
 let _mouseTick = false,
 	_mouseX = 0,
 	_mouseY = 0
+let _mainSpotEl = null,
+	_coordsEl = null
 document.addEventListener('mousemove', e => {
 	_mouseX = e.clientX
 	_mouseY = e.clientY
@@ -186,10 +290,12 @@ document.addEventListener('mousemove', e => {
 		requestAnimationFrame(() => {
 			const x = (_mouseX / window.innerWidth - 0.5) * 60
 			const y = (_mouseY / window.innerHeight - 0.5) * 60
-			const mainSpot = document.getElementById('main-spot')
-			if (mainSpot) mainSpot.style.transform = `translate(${x}px, ${y}px)`
-			const coords = document.getElementById('mouse-coords')
-			if (coords) coords.textContent = `X: ${_mouseX} // Y: ${_mouseY}`
+			if (!_mainSpotEl) _mainSpotEl = document.getElementById('main-spot')
+			if (_mainSpotEl)
+				_mainSpotEl.style.transform = `translate(${x}px, ${y}px)`
+			if (!_coordsEl) _coordsEl = document.getElementById('mouse-coords')
+			if (_coordsEl)
+				_coordsEl.textContent = `X: ${_mouseX} // Y: ${_mouseY}`
 			_mouseTick = false
 		})
 	}
@@ -385,16 +491,7 @@ async function fetchShopifyProducts(handles) {
 async function enrichHotspotWithShopify(hotspot) {
 	if (!hotspot.shopify_handle || hotspot.shopify_handle === '#') {
 		// Нет shopify_handle - используем fallback если есть
-		if (hotspot.fallback) {
-			return {
-				...hotspot,
-				...hotspot.fallback,
-				source: 'fallback',
-				top: hotspot.top,
-				left: hotspot.left,
-			}
-		}
-		return hotspot
+		return withFallbackHotspot(hotspot)
 	}
 
 	// Пытаемся загрузить из Shopify
@@ -412,17 +509,7 @@ async function enrichHotspotWithShopify(hotspot) {
 	}
 
 	// Shopify не ответил - используем fallback если есть
-	if (hotspot.fallback) {
-		return {
-			...hotspot,
-			...hotspot.fallback,
-			source: 'fallback',
-			top: hotspot.top,
-			left: hotspot.left,
-		}
-	}
-
-	return hotspot
+	return withFallbackHotspot(hotspot)
 }
 
 // Обогащение всех hotspots в комнате
@@ -640,15 +727,7 @@ async function updateFloatingProducts(room) {
 					}
 
 					// Используем fallback данные
-					if (h.fallback) {
-						return {
-							...h,
-							...h.fallback,
-							source: 'fallback',
-						}
-					}
-
-					return { ...h }
+					return withFallbackHotspot(h)
 				}),
 			)
 		} else if (room.products && Array.isArray(room.products)) {
@@ -677,66 +756,31 @@ async function updateFloatingProducts(room) {
 			const product = items[i]
 
 			// Получаем данные (из product напрямую или из fallback)
-			const rawName =
-				product.product_name ||
-				product.name ||
-				product.title ||
-				'Product'
-			const name =
-				rawName.length > 24 ? rawName.slice(0, 24) + '...' : rawName
-			const img = product.img || product.image || ''
-			const price =
-				product.price && product.price !== 'N/A' ? product.price : null
-			const currencyCode = (product.currency || '')
-				.toString()
-				.toUpperCase()
-			const currencySymbolLocal =
-				currencyCode === 'EUR'
-					? '€'
-					: currencyCode === 'USD'
-						? '$'
-						: product.currency || '€'
-			const rating = product.rating || null
-			const reviewsCount = product.reviews_count || null
-			const isFromShopify = product.source === 'shopify'
+			const {
+				rawName,
+				name,
+				img,
+				price,
+				currencySymbolLocal,
+				ratingData,
+			} = getDisplayProductData(product)
 
-			// Рейтинг
-			const ratingHtml = rating
-				? `<div class="flex items-center gap-1 mt-1">
-					<span class="text-yellow-500 text-[8px]">★</span>
-					<span class="text-[8px] text-white/60">${rating}</span>
-					${reviewsCount ? `<span class="text-[7px] text-white/30">(${reviewsCount})</span>` : ''}
-				</div>`
-				: ''
-
-			// Индикатор источника данных
-			const sourceIndicator = isFromShopify
-				? null
-				: product.source === 'fallback'
-					? `<span class="text-[7px] text-white/30 uppercase tracking-wider">Preview</span>`
-					: ''
-
-			// Цена
-			const priceHtml = price
-				? `<div class="text-[9px] font-bold text-purple-400">${price}${currencySymbolLocal}</div>`
-				: ''
-
-			// Изображение или заглушка
 			const imgHtml = img
 				? `<img src="${img}" loading="lazy" class="w-full h-24 object-cover rounded-lg mb-2 shadow-lg transition-transform group-hover:scale-105" alt="${name}" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-24 bg-zinc-800 rounded-lg mb-2 flex items-center justify-center\\'><span class=\\'text-purple-500\\'>✦</span></div>'" />`
 				: `<div class="w-full h-24 bg-zinc-800/50 rounded-lg mb-2 flex items-center justify-center border border-white/5"><span class="text-purple-500/50 text-lg">✦</span></div>`
 
 			slot.innerHTML = `
-				<div class="relative group cursor-pointer" role="button" tabindex="0" title="${rawName}">
-					${imgHtml}
-					<div class="font-bold text-[10px] leading-tight group-hover:text-purple-400 transition-colors uppercase tracking-tight">${name}</div>
-					${ratingHtml}
-					<div class="flex justify-between items-center mt-1">
-						${priceHtml}
-						${sourceIndicator}
-					</div>
-				</div>
-			`
+<div class="relative group cursor-pointer" role="button" tabindex="0" title="${rawName}">
+	${imgHtml}
+	<div class="font-bold text-[10px] leading-tight group-hover:text-purple-400 transition-colors uppercase tracking-tight">${name}</div>
+    
+	<div class="flex justify-between items-center mt-1">
+		<span class="text-[15px] font-bold text-purple-400">${price}${currencySymbolLocal}</span>
+        
+		${createRatingMarkup(ratingData, 'revs')}
+	</div>
+</div>
+`
 
 			// Клик открывает Sheet с информацией о товаре
 			slot.onclick = e => {
@@ -820,7 +864,7 @@ const swiper = new Swiper('.mySwiper', {
 			author: 'Ava R.',
 		},
 	]
-	document.addEventListener('DOMContentLoaded', () => {
+	onDomReady(() => {
 		const wrapper = document.querySelector(
 			'.reviewsMarqueeSwiper .swiper-wrapper',
 		)
@@ -914,7 +958,7 @@ const swiper = new Swiper('.mySwiper', {
 			scheduleNext()
 		}, 350)
 	}
-	document.addEventListener('DOMContentLoaded', () => {
+	onDomReady(() => {
 		setTimeout(() => {
 			textEl.style.opacity = '1'
 			authorEl.style.opacity = '1'
@@ -1115,7 +1159,7 @@ function zoomOut() {
 }
 
 // wheel, dblclick and pinch handlers on viewer wrapper
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
 	const wrapper = document.getElementById('viewer-media-wrapper')
 	if (!wrapper) return
 	wrapper.addEventListener('wheel', e => {
@@ -1336,12 +1380,14 @@ function prevViewerRoom() {
 	showViewerRoom(rooms[prevIdx], { suppress: true })
 }
 
-setInterval(() => {
-	const clock = document.getElementById('live-clock')
-	if (clock) clock.textContent = new Date().toTimeString().split(' ')[0]
-}, 1000)
-
 let _scrollTick = false
+const _scrollEls = {
+	progress: null,
+	path: null,
+	interactiveSection: null,
+	finalCta: null,
+	carouselSection: null,
+}
 window.addEventListener('scroll', () => {
 	if (!_scrollTick) {
 		_scrollTick = true
@@ -1352,14 +1398,28 @@ window.addEventListener('scroll', () => {
 				document.documentElement.scrollHeight -
 				document.documentElement.clientHeight
 			const scrolled = height ? (winScroll / height) * 100 : 0
-			const prog = document.getElementById('scroll-progress')
+			const prog =
+				_scrollEls.progress ||
+				(_scrollEls.progress =
+					document.getElementById('scroll-progress'))
 			if (prog) prog.style.width = scrolled + '%'
-			const path = document.getElementById('drawing-path')
-			const interactiveSection = document.getElementById(
-				'interactive-product-flow',
-			)
-			const finalCta = document.getElementById('final-collection-cta')
-			const carouselSection = document.getElementById('collection')
+			const path =
+				_scrollEls.path ||
+				(_scrollEls.path = document.getElementById('drawing-path'))
+			const interactiveSection =
+				_scrollEls.interactiveSection ||
+				(_scrollEls.interactiveSection = document.getElementById(
+					'interactive-product-flow',
+				))
+			const finalCta =
+				_scrollEls.finalCta ||
+				(_scrollEls.finalCta = document.getElementById(
+					'final-collection-cta',
+				))
+			const carouselSection =
+				_scrollEls.carouselSection ||
+				(_scrollEls.carouselSection =
+					document.getElementById('collection'))
 			if (path && interactiveSection && finalCta && carouselSection) {
 				const sectionRect = interactiveSection.getBoundingClientRect()
 				const pathLength = path.getTotalLength()
@@ -1427,6 +1487,13 @@ function generateLinePath() {
 	path.style.strokeDashoffset = length
 }
 
+function scrollToElementWithOffset(target, offset = 100) {
+	if (!target) return
+	const elementPosition = target.getBoundingClientRect().top
+	const offsetPosition = elementPosition + window.pageYOffset - offset
+	window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+}
+
 window.addEventListener('load', generateLinePath)
 window.addEventListener('resize', generateLinePath)
 
@@ -1436,12 +1503,7 @@ document
 		e.preventDefault()
 		const targetId = this.getAttribute('href')
 		const targetElement = document.querySelector(targetId)
-		if (targetElement) {
-			const offset = 100
-			const elementPosition = targetElement.getBoundingClientRect().top
-			const offsetPosition = elementPosition + window.pageYOffset - offset
-			window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
-		}
+		scrollToElementWithOffset(targetElement, 100)
 	})
 
 document
@@ -1449,12 +1511,7 @@ document
 	?.addEventListener('click', function (e) {
 		e.preventDefault()
 		const targetElement = document.getElementById('collection')
-		if (targetElement) {
-			const offset = 100
-			const elementPosition = targetElement.getBoundingClientRect().top
-			const offsetPosition = elementPosition + window.pageYOffset - offset
-			window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
-		}
+		scrollToElementWithOffset(targetElement, 100)
 	})
 
 const mainDemoSwiper = new Swiper('.mainDemoSwiper', {
@@ -1614,47 +1671,21 @@ function openSheet(roomIdxOrSpot, spotIdx) {
 	const overlay = document.getElementById('sheet-overlay')
 	const content = document.getElementById('sheet-content')
 	if (!content) return
-	const rawName = spot.product_name || spot.name || spot.title || 'Product'
-	const name = rawName.length > 24 ? `${rawName.slice(0, 24)}...` : rawName
-	const img = spot.img || spot.image || ''
-	const price = spot.price && spot.price !== 'N/A' ? spot.price : null
-	const currencyCode = (spot.currency || '').toString().toUpperCase()
-	const currencySymbolLocal =
-		currencyCode === 'EUR'
-			? '€'
-			: currencyCode === 'USD'
-				? '$'
-				: spot.currency || '$'
-	const variantTitles = Array.isArray(spot.variants)
-		? spot.variants.map(v => v && v.title).filter(Boolean)
-		: []
-	const hasVariants =
-		variantTitles.length > 1 ||
-		(variantTitles.length === 1 &&
-			variantTitles[0].toLowerCase() !== 'default title')
-	const variantsLabel = hasVariants
-		? `Variants: ${variantTitles.slice(0, 3).join(' • ')}`
-		: ''
-	const link = spot.link || spot.url || null
-	const rating = spot.rating || null
-	const reviewsCount = spot.reviews_count || null
+	const {
+		rawName,
+		name,
+		img,
+		price,
+		currencySymbolLocal,
+		ratingData,
+		link,
+		hasVariants,
+		variantsLabel,
+	} = getDisplayProductData(spot)
+	const safeTitle = rawName.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+	const safeImage = (img || '').replace(/"/g, '&quot;')
+	const handleValue = spot.shopify_handle || spot.id || 'product'
 
-	// Рейтинг HTML
-	const ratingHtml = rating
-		? `<div class="flex items-center gap-2 mt-2">
-			<div class="flex items-center gap-0.5">
-				${Array(5)
-					.fill(0)
-					.map(
-						(_, i) =>
-							`<span class="text-[10px] ${i < Math.floor(rating) ? 'text-yellow-500' : 'text-white/20'}">★</span>`,
-					)
-					.join('')}
-			</div>
-			<span class="text-[10px] text-white/60 font-bold">${rating}</span>
-			${reviewsCount ? `<span class="text-[9px] text-white/40">(${reviewsCount} reviews)</span>` : ''}
-		</div>`
-		: ''
 	content.innerHTML = `
   <div class="flex flex-col gap-4"> 
     <div class="w-full aspect-video rounded-xl overflow-hidden bg-neutral-900 border border-white/10 shadow-inner">
@@ -1664,10 +1695,7 @@ function openSheet(roomIdxOrSpot, spotIdx) {
       <div class="flex justify-between items-end">
         <div>
           <h3 class="text-xl font-black text-white uppercase italic leading-none">${name}</h3>
-          <p class="text-[10px] text-purple-500 font-bold uppercase tracking-widest mt-1">${
-				spot.category || 'Setup'
-			}</p>
-			${ratingHtml}
+				 ${createRatingMarkup(ratingData, 'reviews', 'mt-1')}
         </div>
         <div class="text-right">
           <div class="text-xl font-black text-white" data-price="${price || 0}">${
@@ -1684,7 +1712,25 @@ function openSheet(roomIdxOrSpot, spotIdx) {
 			price
 				? `
 					${hasVariants ? `<div class="text-[9px] uppercase tracking-[0.2em] text-white/50 text-center mb-2">${variantsLabel}</div>` : ''}
-					<button onclick="addToCartFromSheet('${spot.shopify_handle || spot.id || 'product'}', '${rawName.replace(/'/g, "\\'")}', ${price}, '${img}')" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 hover:text-white transition-all active:scale-95 shadow-xl">Add to Cart</button>`
+					<button
+						class="relative w-full group/btn active:scale-95 transition-all duration-200 mt-2 js-add-to-cart"
+						data-add-to-cart="true"
+						data-handle="${handleValue}"
+						data-title="${safeTitle}"
+						data-price="${price}"
+						data-image="${safeImage}"
+						data-close-sheet="true"
+					>
+        
+    			    <div class="relative bg-white text-black text-[7px] font-bold uppercase tracking-[0.2em] py-1 px-12 w-fit mx-auto rounded-t-lg -mb-[8px] z-10 transition-colors group-hover/btn:bg-purple-600 group-hover/btn:text-white">
+    			        Has more options
+    			    </div>
+
+    			    <div class="bg-white text-black py-3 px-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl transition-all group-hover/btn:bg-purple-600 group-hover/btn:text-white">
+    			        Add to Cart
+    			    </div>
+    			</button>
+				`
 				: link
 					? `<a href="${link}" target="_blank" class="w-full inline-flex items-center justify-center bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-purple-600 hover:text-white transition-all shadow-xl">Learn more</a>`
 					: `<button class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest opacity-60 cursor-not-allowed" disabled>Coming soon</button>`
@@ -1709,7 +1755,7 @@ function closeSheet() {
 }
 
 // bottom-sheet drag handlers
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
 	const sheet = document.getElementById('bottom-sheet')
 	const grabber = document.getElementById('sheet-grabber')
 	let isDragging = false
@@ -1747,7 +1793,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 // Expose helpers for backward compatibility and initialize app
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
 	loadData()
 	runReveal() // expose common globals used by inline attributes
 	if (document.getElementById('cart-drawer')) Cart.init()
@@ -1767,23 +1813,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (prevBtn) prevBtn.addEventListener('click', prevViewerRoom)
 	if (nextBtn) nextBtn.addEventListener('click', nextViewerRoom)
 })
-
-// Функция добавления в корзину из sheet с передачей данных напрямую
-window.addToCartFromSheet = function (handle, title, price, image) {
-	const product = {
-		id: handle || Date.now().toString(),
-		title: title || 'Unknown Item',
-		price: parseFloat(price) || 0,
-		image: image || fallbackImage,
-		handle: handle,
-	}
-
-	// Добавляем в корзину
-	Cart.addItem(product, true)
-
-	// Закрываем sheet после добавления
-	closeSheet()
-}
 
 /* -------------------- Gallery Page Specifics -------------------- */
 
@@ -1854,18 +1883,7 @@ function initGalleryHero() {
 	})
 }
 
-// 2. Расширяем loadData (перезаписываем или дополняем логику)
-// Мы можем просто добавить вызов в конец существующей обработки данных.
-// Так как loadData уже определена выше, мы добавим слушатель,
-// который проверит наличие данных и запустит карусель.
-
-const originalLoadData = window.loadData // Если нужно сохранить ссылку (опционально)
-
-// Просто добавляем проверку в интервале или после загрузки DOM,
-// но лучше всего встроить вызов initGalleryHero() внутрь loadData в основном коде.
-// Если ты не хочешь менять основной код выше, добавь этот блок:
-
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
 	// Ждем пока loadData отработает (она асинхронна),
 	// поэтому используем простой поллинг или перехватываем выполнение.
 	// Самый надежный способ без изменения верха скрипта:
@@ -2011,7 +2029,7 @@ function initSpaceSwitcher() {
 }
 
 // Запуск при загрузке страницы
-document.addEventListener('DOMContentLoaded', initSpaceSwitcher)
+onDomReady(initSpaceSwitcher)
 
 // Находим элементы и инициализируем поведение после загрузки DOM
 function initMenu() {
@@ -2093,16 +2111,10 @@ function initMenu() {
 
 // Ensure initialization runs even if DOMContentLoaded already fired
 console.log('document.readyState', document.readyState)
-if (document.readyState === 'loading') {
-	console.log('initMenu will run on DOMContentLoaded')
-	document.addEventListener('DOMContentLoaded', () => {
-		console.log('DOMContentLoaded fired, running initMenu')
-		initMenu()
-	})
-} else {
-	console.log('document already ready, running initMenu now')
+onDomReady(() => {
+	console.log('DOM ready, running initMenu')
 	initMenu()
-}
+})
 
 /* -------------------- SIDE CART LOGIC -------------------- */
 const Cart = (function () {
@@ -2367,107 +2379,219 @@ const Cart = (function () {
 	}
 })()
 
-/**
- * Unified addToCart function
- * Supports both local (fallback) and Shopify modes
- * @param {string} productIdOrHandle - Product ID or Shopify handle
- * @param {HTMLElement} buttonEl - Optional button element for animation
- */
-window.addToCart = async function (productIdOrHandle, buttonEl) {
-	let product = null
-	let imgEl = null
-	let sourceEl = null
+const normalizeVariantId = id => {
+	if (!id) return null
+	const raw = id.toString()
+	if (raw.includes('gid://')) {
+		const parts = raw.split('/')
+		return parts[parts.length - 1]
+	}
+	return raw
+}
 
-	// Определяем источник данных (sheet, card, или cached product)
+const parsePriceValue = value => {
+	if (value === null || value === undefined) return null
+	const numeric = typeof value === 'string' ? parseFloat(value) : value
+	if (Number.isNaN(numeric)) return null
+	return numeric
+}
+
+async function fetchProductJsonByHandle(handle) {
+	if (!handle) return null
+	const primaryUrl = `${getProductUrl(handle)}.js`
+	try {
+		const response = await fetch(primaryUrl, {
+			credentials: 'same-origin',
+		})
+		if (response.ok) return await response.json()
+	} catch (err) {
+		console.warn('[Cart] Failed to fetch product JSON:', err)
+	}
+
+	const fallbackUrl = `/products/${handle}.js`
+	if (fallbackUrl !== primaryUrl) {
+		try {
+			const response = await fetch(fallbackUrl, {
+				credentials: 'same-origin',
+			})
+			if (response.ok) return await response.json()
+		} catch (err) {
+			console.warn('[Cart] Fallback product JSON failed:', err)
+		}
+	}
+	return null
+}
+
+async function addToCartShopify(variantId, quantity) {
+	if (!variantId) return false
+	try {
+		const response = await fetch('/cart/add.js', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				id: variantId,
+				quantity: quantity || 1,
+			}),
+		})
+		return response.ok
+	} catch (err) {
+		console.warn('[Cart] Shopify add failed:', err)
+		return false
+	}
+}
+
+const buildProductFromElement = el => ({
+	handle: el?.dataset?.handle || el?.getAttribute?.('data-handle') || null,
+	variantId: el?.dataset?.variantId || null,
+	title: el?.dataset?.title || null,
+	price: el?.dataset?.price || null,
+	image: el?.dataset?.image || null,
+	quantity: el?.dataset?.quantity || null,
+	sourceEl: el || null,
+})
+
+const resolveAddToCartInput = input => {
+	if (!input) return { product: null, sourceEl: null }
+	if (input.nodeType === 1) {
+		return { product: buildProductFromElement(input), sourceEl: input }
+	}
+	if (typeof input === 'string' || typeof input === 'number') {
+		return { product: { handle: input.toString() }, sourceEl: null }
+	}
+	if (typeof input === 'object') {
+		return { product: { ...input }, sourceEl: input.sourceEl || null }
+	}
+	return { product: null, sourceEl: null }
+}
+
+/**
+ * Universal addToCart function
+ * Accepts product object or product ID/handle
+ */
+async function addToCart(productInput) {
+	const { product, sourceEl } = resolveAddToCartInput(productInput)
+	if (!product) return { ok: false, product: null }
+
+	const quantity = parseInt(
+		product.quantity || sourceEl?.dataset?.quantity || 1,
+	)
+	const handle =
+		product.handle ||
+		product.id ||
+		sourceEl?.dataset?.handle ||
+		sourceEl?.getAttribute?.('data-handle') ||
+		null
+
+	let productData = product.productData || null
+	const inputVariantId =
+		product.variantId || sourceEl?.dataset?.variantId || null
+	let variantId = normalizeVariantId(inputVariantId)
+
+	if (!productData && !variantId && handle) {
+		productData = await fetchProductJsonByHandle(handle)
+	}
+
+	const selectedVariant =
+		!variantId && productData?.variants
+			? productData.variants.find(v => v.available) ||
+				productData.variants[0]
+			: null
+
+	variantId = normalizeVariantId(variantId || selectedVariant?.id)
+
+	const cardScope = sourceEl?.closest?.('article, .group') || null
+	const fallbackTitle = cardScope?.querySelector('h3')?.textContent?.trim()
+	const ariaLabel = sourceEl?.getAttribute?.('aria-label') || ''
+	const ariaTitle = ariaLabel
+		.replace(/^Add\s+/i, '')
+		.replace(/\s+to\s+cart\s*$/i, '')
+		.trim()
+	const fallbackImage = cardScope?.querySelector('img')?.getAttribute('src')
+	const resolvedTitle =
+		product.title ||
+		productData?.title ||
+		sourceEl?.dataset?.title ||
+		fallbackTitle ||
+		ariaTitle ||
+		handle
+	const resolvedPrice =
+		product.price ||
+		sourceEl?.dataset?.price ||
+		formatMoneyFromCents(selectedVariant?.price) ||
+		formatMoneyFromCents(productData?.price)
+	const resolvedImage = resolveAssetImage(
+		product.image ||
+			sourceEl?.dataset?.image ||
+			fallbackImage ||
+			selectedVariant?.featured_image?.src ||
+			productData?.featured_image,
+	)
+
+	const localProduct = {
+		id: variantId || product.id || handle || Date.now().toString(),
+		handle: handle,
+		title: resolvedTitle || 'Unknown Item',
+		price: parsePriceValue(resolvedPrice) || 0,
+		image: resolvedImage || fallbackImage,
+		variantId: variantId,
+		variantTitle: selectedVariant?.title || product.variantTitle,
+		quantity: Number.isNaN(quantity) ? 1 : quantity,
+	}
+
+	let shopifyAdded = false
+	if (variantId) {
+		shopifyAdded = await addToCartShopify(variantId, localProduct.quantity)
+	}
+
+	if (typeof Cart !== 'undefined' && Cart.addItem) {
+		Cart.addItem(localProduct, true)
+	}
+
+	return { ok: shopifyAdded, product: localProduct }
+}
+
+window.addToCart = addToCart
+
+onDomReady(() => {
+	document.addEventListener('click', e => {
+		const btn = e.target.closest('[data-add-to-cart]')
+		if (!btn || btn.hasAttribute('disabled')) return
+		e.preventDefault()
+		addToCart(btn).then(() => {
+			if (btn.dataset.closeSheet === 'true') closeSheet()
+		})
+	})
+
+	document.addEventListener('click', e => {
+		const btn = e.target.closest('[data-add-to-cart-pdp]')
+		if (!btn || btn.hasAttribute('disabled')) return
+		e.preventDefault()
+		if (typeof window.handlePDPAddToCart === 'function') {
+			window.handlePDPAddToCart()
+		}
+	})
+})
+
+/**
+ * Animation-only add to cart handler (no cart mutation)
+ * @param {HTMLElement} buttonEl - Button element that triggered the action
+ */
+window.addAnimationProductToCart = function (buttonEl) {
+	let sourceEl = null
+	let imgEl = null
 	const sheetContent = document.getElementById('sheet-content')
 	const bottomSheet = document.getElementById('bottom-sheet')
 	const isSheetOpen =
 		bottomSheet && !bottomSheet.style.transform.includes('100%')
-	const card =
-		buttonEl?.closest('.group') || buttonEl?.parentElement?.parentElement
 
 	if (sheetContent && isSheetOpen) {
-		// Данные из sheet (детальный просмотр товара)
 		sourceEl = sheetContent
-		const titleEl =
-			sheetContent.querySelector('h3') || sheetContent.querySelector('h4')
-		const priceEl = sheetContent.querySelector('[data-price]')
 		imgEl = sheetContent.querySelector('img')
-
-		product = {
-			id:
-				productIdOrHandle ||
-				(titleEl ? titleEl.innerText : Date.now().toString()),
-			title: titleEl ? titleEl.innerText : 'Unknown Item',
-			price: priceEl ? parseFloat(priceEl.dataset.price) || 0 : 0,
-			image: imgEl ? imgEl.src : fallbackImage,
-			handle: productIdOrHandle,
-		}
-	} else if (card) {
-		// Данные из карточки товара (Assortment section)
-		sourceEl = card
-		const titleEl = card.querySelector('h4') || card.querySelector('h3')
-		const priceEl =
-			card.querySelector('[data-price]') ||
-			card.querySelector('.font-mono')
-		imgEl = card.querySelector('img')
-
-		let price = 0
-		if (priceEl) {
-			price = priceEl.dataset?.price
-				? parseFloat(priceEl.dataset.price)
-				: parseFloat(priceEl.innerText.replace(/[^0-9.]/g, '')) || 0
-		}
-
-		product = {
-			id:
-				productIdOrHandle ||
-				(titleEl ? titleEl.innerText : Date.now().toString()),
-			title: titleEl ? titleEl.innerText : 'Unknown Item',
-			price: price,
-			image: imgEl ? imgEl.src : fallbackImage,
-			handle: productIdOrHandle,
-		}
-	} else if (productIdOrHandle && productCache.has(productIdOrHandle)) {
-		// Данные из кэша Shopify
-		const cached = productCache.get(productIdOrHandle)
-		product = {
-			id: productIdOrHandle,
-			title: cached.title || cached.product_name || 'Unknown Item',
-			price: cached.price || 0,
-			image: cached.img || cached.images?.[0] || fallbackImage,
-			handle: productIdOrHandle,
-			variantId: cached.variantId,
-		}
-	} else {
-		// Попробуем загрузить из Shopify
-		if (productIdOrHandle && shopifyConfig) {
-			const shopifyData = await fetchShopifyProduct(productIdOrHandle)
-			if (shopifyData) {
-				product = {
-					id: productIdOrHandle,
-					title:
-						shopifyData.title ||
-						shopifyData.product_name ||
-						'Unknown Item',
-					price: shopifyData.price || 0,
-					image:
-						shopifyData.img ||
-						shopifyData.images?.[0] ||
-						fallbackImage,
-					handle: productIdOrHandle,
-					variantId: shopifyData.variantId,
-				}
-			}
-		}
-	}
-
-	if (!product) {
-		console.warn(
-			'[addToCart] Could not find product data for:',
-			productIdOrHandle,
-		)
-		return
+	} else if (buttonEl && buttonEl.closest) {
+		sourceEl = buttonEl.closest('.group') || buttonEl.parentElement
+		imgEl = sourceEl ? sourceEl.querySelector('img') : null
 	}
 
 	// Button animation
@@ -2516,71 +2640,10 @@ window.addToCart = async function (productIdOrHandle, buttonEl) {
 
 		setTimeout(() => {
 			flyer.remove()
-			addToCartLocal(product)
-			addToCartShopify(product)
 			pulseBadge()
 		}, 800)
 	} else {
-		addToCartLocal(product)
-		addToCartShopify(product)
 		pulseBadge()
-	}
-}
-
-// Добавление в локальную корзину
-function addToCartLocal(product) {
-	if (typeof Cart !== 'undefined' && Cart.addItem) {
-		Cart.addItem(product, true)
-	}
-}
-
-// Добавление в Shopify корзину (если подключен)
-async function addToCartShopify(product) {
-	if (!shopifyConfig || !product.handle) {
-		console.log('[Local mode] Product added locally:', product.title)
-		return
-	}
-
-	try {
-		// Получаем variantId если его нет
-		let variantId = product.variantId
-		if (!variantId && product.handle) {
-			const cached = productCache.get(product.handle)
-			variantId = cached?.variantId
-		}
-
-		if (!variantId) {
-			console.warn('[Shopify] No variant ID found for:', product.handle)
-			return
-		}
-
-		// Shopify Cart API - добавление товара
-		const response = await fetch(
-			`https://${shopifyConfig.store_domain}/cart/add.js`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					items: [
-						{
-							id: variantId,
-							quantity: 1,
-						},
-					],
-				}),
-			},
-		)
-
-		if (response.ok) {
-			const data = await response.json()
-			console.log('[Shopify] Added to cart:', data)
-		} else {
-			console.warn('[Shopify] Failed to add to cart:', response.status)
-		}
-	} catch (error) {
-		console.warn('[Shopify] Cart API error:', error)
 	}
 }
 
@@ -2851,7 +2914,7 @@ function pulseBadge() {
 		const sourceEl = document.getElementById('product-source')
 		if (sourceEl) {
 			if (product.source === 'shopify') {
-				sourceEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[8px] text-green-400 uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>Live from Shopify</span>`
+				sourceEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[8px] text-green-400 uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>In stock</span>`
 			} else {
 				sourceEl.innerHTML = `<span class="inline-flex items-center gap-1 text-[8px] text-white/30 uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-white/30 rounded-full"></span>Local preview</span>`
 			}
@@ -2872,42 +2935,36 @@ function pulseBadge() {
 		const titleEl = document.getElementById('product-title')
 		if (titleEl) titleEl.textContent = product.title
 
-		// Rating
-		if (product.rating) {
-			const ratingSection = document.getElementById('product-rating')
-			const starsEl = document.getElementById('product-stars')
-			const ratingValue = document.getElementById('product-rating-value')
-			const reviewsCount = document.getElementById(
-				'product-reviews-count',
-			)
-
-			if (ratingSection) ratingSection.classList.remove('hidden')
-			if (starsEl)
-				starsEl.innerHTML = renderStars(parseFloat(product.rating))
-			if (ratingValue) ratingValue.textContent = product.rating
-			if (reviewsCount)
-				reviewsCount.textContent = `(${product.reviews_count || 0} reviews)`
-		}
-
 		// Price
 		const priceEl = document.getElementById('product-price')
 		const oldPriceEl = document.getElementById('product-old-price')
 		const discountEl = document.getElementById('product-discount')
 		const currency = product.currency || '$'
+		const numericPrice = parseFloat(product.price)
+		const numericOldPrice = parseFloat(product.old_price)
+		const hasDiscount =
+			!Number.isNaN(numericOldPrice) &&
+			!Number.isNaN(numericPrice) &&
+			numericOldPrice > numericPrice
 
 		if (priceEl && product.price) {
 			priceEl.textContent = `${currency}${product.price}`
 		}
 
-		if (product.old_price && oldPriceEl && discountEl) {
-			oldPriceEl.textContent = `${currency}${product.old_price}`
-			oldPriceEl.classList.remove('hidden')
+		if (oldPriceEl && discountEl) {
+			if (hasDiscount) {
+				oldPriceEl.textContent = `${currency}${product.old_price}`
+				oldPriceEl.classList.remove('hidden')
 
-			const discount = Math.round(
-				(1 - product.price / product.old_price) * 100,
-			)
-			discountEl.textContent = `-${discount}%`
-			discountEl.classList.remove('hidden')
+				const discount = Math.round(
+					(1 - numericPrice / numericOldPrice) * 100,
+				)
+				discountEl.textContent = `-${discount}%`
+				discountEl.classList.remove('hidden')
+			} else {
+				oldPriceEl.classList.add('hidden')
+				discountEl.classList.add('hidden')
+			}
 		}
 
 		// Description
@@ -2969,13 +3026,6 @@ function pulseBadge() {
 		// Specifications
 		renderSpecifications(product.specifications || {})
 
-		// Reviews
-		renderReviews(
-			product.reviews || [],
-			product.rating,
-			product.reviews_count,
-		)
-
 		// Mobile sticky bar
 		const stickyPrice = document.getElementById('sticky-price')
 		const stickyTitle = document.getElementById('sticky-title')
@@ -2983,15 +3033,13 @@ function pulseBadge() {
 		if (stickyTitle) stickyTitle.textContent = product.title
 	}
 
-	// Render stars HTML
-	function renderStars(rating) {
-		return Array(5)
-			.fill(0)
-			.map(
-				(_, i) =>
-					`<span class="text-sm ${i < Math.floor(rating) ? 'text-yellow-500' : 'text-white/20'}">★</span>`,
-			)
-			.join('')
+	function updateVariantPriceDisplay(price) {
+		if (!currentProduct || price === null || price === undefined) return
+		const priceEl = document.getElementById('product-price')
+		const stickyPrice = document.getElementById('sticky-price')
+		const currency = currentProduct.currency || '€'
+		if (priceEl) priceEl.textContent = `${currency}${price}`
+		if (stickyPrice) stickyPrice.textContent = `${currency}${price}`
 	}
 
 	// Render product images
@@ -3133,84 +3181,6 @@ function pulseBadge() {
 		`,
 			)
 			.join('')
-	}
-
-	// Render reviews
-	function renderReviews(reviews, avgRating, totalCount) {
-		// Tab count
-		const tabCount = document.getElementById('tab-reviews-count')
-		if (tabCount)
-			tabCount.textContent = `(${totalCount || reviews.length || 0})`
-
-		// Summary
-		const avgEl = document.getElementById('reviews-average')
-		const summaryStars = document.getElementById('reviews-stars-summary')
-		const totalEl = document.getElementById('reviews-total')
-
-		if (avgEl) avgEl.textContent = avgRating || '0.0'
-		if (summaryStars)
-			summaryStars.innerHTML = renderStars(parseFloat(avgRating) || 0)
-		if (totalEl)
-			totalEl.textContent = `Based on ${totalCount || reviews.length || 0} reviews`
-
-		// Breakdown (calculate from reviews)
-		const breakdown = document.getElementById('reviews-breakdown')
-		if (breakdown && reviews.length) {
-			const counts = [0, 0, 0, 0, 0] // 5,4,3,2,1 stars
-			reviews.forEach(r => {
-				if (r.rating >= 1 && r.rating <= 5) counts[5 - r.rating]++
-			})
-			const total = reviews.length
-
-			breakdown.innerHTML = [5, 4, 3, 2, 1]
-				.map((stars, i) => {
-					const pct = total
-						? Math.round((counts[i] / total) * 100)
-						: 0
-					return `
-					<div class="flex items-center gap-3">
-						<span class="text-xs text-white/40 w-8">${stars}★</span>
-						<div class="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-							<div class="h-full bg-yellow-500 rounded-full" style="width: ${pct}%"></div>
-						</div>
-						<span class="text-xs text-white/40 w-8">${counts[i]}</span>
-					</div>
-				`
-				})
-				.join('')
-		}
-
-		// Reviews list
-		const listEl = document.getElementById('reviews-list')
-		if (listEl) {
-			if (!reviews.length) {
-				listEl.innerHTML =
-					'<p class="text-white/40 text-sm">No reviews yet. Be the first to review this product!</p>'
-			} else {
-				listEl.innerHTML = reviews
-					.map(
-						r => `
-					<div class="pb-6 border-b border-white/5">
-						<div class="flex items-start justify-between mb-2">
-							<div>
-								<div class="flex items-center gap-2">
-									<span class="font-bold">${r.author}</span>
-									${r.verified ? '<span class="text-[8px] uppercase tracking-wider text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">Verified</span>' : ''}
-								</div>
-								<div class="flex items-center gap-2 mt-1">
-									<div class="flex">${renderStars(r.rating)}</div>
-									<span class="text-xs text-white/30">${r.date}</span>
-								</div>
-							</div>
-						</div>
-						<h4 class="font-bold text-sm mb-1">${r.title}</h4>
-						<p class="text-white/60 text-sm">${r.content}</p>
-					</div>
-				`,
-					)
-					.join('')
-			}
-		}
 	}
 
 	// Init product swipers
@@ -3439,14 +3409,6 @@ function pulseBadge() {
 				},
 			}
 
-			if (product.rating) {
-				schema.aggregateRating = {
-					'@type': 'AggregateRating',
-					ratingValue: product.rating,
-					reviewCount: product.reviews_count || 0,
-				}
-			}
-
 			jsonLd.textContent = JSON.stringify(schema, null, 2)
 		}
 	}
@@ -3459,11 +3421,7 @@ function pulseBadge() {
 		initProductPage()
 	}
 
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', autoInitPdp)
-	} else {
-		autoInitPdp()
-	}
+	onDomReady(autoInitPdp)
 
 	// Expose functions globally
 	window.initProductPage = initProductPage
@@ -3510,13 +3468,7 @@ function pulseBadge() {
 
 		// Update price if variant has different price
 		if (btn.dataset.variantPrice && currentProduct) {
-			const priceEl = document.getElementById('product-price')
-			const stickyPrice = document.getElementById('sticky-price')
-			const currency = currentProduct.currency || '€'
-			if (priceEl)
-				priceEl.textContent = `${currency}${btn.dataset.variantPrice}`
-			if (stickyPrice)
-				stickyPrice.textContent = `${currency}${btn.dataset.variantPrice}`
+			updateVariantPriceDisplay(btn.dataset.variantPrice)
 		}
 
 		// Change main image
@@ -3549,13 +3501,7 @@ function pulseBadge() {
 
 		// Update price if variant has different price
 		if (btn.dataset.variantPrice && currentProduct) {
-			const priceEl = document.getElementById('product-price')
-			const stickyPrice = document.getElementById('sticky-price')
-			const currency = currentProduct.currency || '€'
-			if (priceEl)
-				priceEl.textContent = `${currency}${btn.dataset.variantPrice}`
-			if (stickyPrice)
-				stickyPrice.textContent = `${currency}${btn.dataset.variantPrice}`
+			updateVariantPriceDisplay(btn.dataset.variantPrice)
 		}
 
 		selectedVariant = {
@@ -3645,7 +3591,7 @@ function pulseBadge() {
 	}
 
 	// Add to cart from PDP
-	window.handlePDPAddToCart = function () {
+	window.handlePDPAddToCart = async function () {
 		if (!currentProduct) return
 
 		const quantity = parseInt(
@@ -3661,41 +3607,30 @@ function pulseBadge() {
 		btnText.textContent = 'Adding...'
 		btn.classList.add('opacity-70')
 
-		// Prepare product data
-		const productToAdd = {
+		await addToCart({
 			handle: currentProduct.handle,
-			title: currentProduct.title,
-			price: selectedVariant?.price || currentProduct.price,
-			currency: currentProduct.currency,
-			image: resolveAssetImage(
-				currentProduct.images?.[0] || fallbackImage,
-			),
 			variantId: selectedVariant?.id,
 			variantTitle: selectedVariant?.title,
+			title: currentProduct.title,
+			price: selectedVariant?.price || currentProduct.price,
+			image: currentProduct.images?.[0] || fallbackImage,
 			quantity: quantity,
-		}
+			sourceEl: btn,
+		})
 
-		// Simulate adding (or real add to cart)
+		// Success state
+		btnText.textContent = 'Added!'
+		btn.classList.remove('opacity-70')
+		btn.classList.add('text-green-500')
+
+		// Pulse badge
+		pulseBadge()
+
+		// Reset after delay
 		setTimeout(() => {
-			// Add to local cart
-			if (typeof Cart !== 'undefined' && Cart.addItem) {
-				Cart.addItem(productToAdd, true)
-			}
-
-			// Success state
-			btnText.textContent = 'Added!'
-			btn.classList.remove('opacity-70')
-			btn.classList.add('text-green-500')
-
-			// Pulse badge
-			pulseBadge()
-
-			// Reset after delay
-			setTimeout(() => {
-				btn.disabled = false
-				btnText.textContent = 'Add to Cart'
-				btn.classList.remove('text-green-500')
-			}, 2000)
-		}, 800)
+			btn.disabled = false
+			btnText.textContent = 'Add to Cart'
+			btn.classList.remove('text-green-500')
+		}, 2000)
 	}
 })()

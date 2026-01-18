@@ -1,0 +1,11 @@
+<div class="custom-jdgm-row">
+  {% assign rating = product.metafields.judgeme.badge | split: "data-average-rating='" | last | split: "'" | first %}
+  {% assign count = product.metafields.judgeme.badge | split: "data-number-of-reviews='" | last | split: "'" | first %}
+
+  <div class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}'>
+    {{ product.metafields.judgeme.badge }}
+  </div>
+
+  <span class="custom-rating-num">{{ rating }}</span>
+  <span class="custom-reviews-count">({{ count }} reviews)</span>
+</div>

@@ -1297,3 +1297,39 @@ img {
 	position: relative;
 	overflow: hidden;
 }
+
+/* Выстраиваем всё в один ряд */
+.custom-jdgm-row {
+	display: flex !important;
+	align-items: center !important;
+	gap: 5px; /* Расстояние между звездой, цифрой и отзывами */
+}
+
+/* Скрываем лишние 4 звезды, оставляем 1 дефолтную */
+.custom-jdgm-row .jdgm-star {
+	display: none !important;
+}
+.custom-jdgm-row .jdgm-star:first-child {
+	display: inline-block !important;
+	/* Размер остается дефолтным от Judge.me */
+}
+
+/* Скрываем стандартный текст Judge.me "10 reviews" */
+.custom-jdgm-row .jdgm-prev-badge__text {
+	display: none !important;
+}
+
+/* Число рейтинга (например, 4.9) — дефолтный размер */
+.custom-rating-num {
+	font-size: 14px; /* Примерный дефолтный размер, подстройте под себя */
+	font-weight: bold;
+	color: inherit;
+}
+
+/* КОЛ-ВО ОТЗЫВОВ — ваш специфический стиль */
+.custom-reviews-count {
+	color: rgba(255, 255, 255, 0.2) !important; /* text-white/20 */
+	font-size: 10px !important; /* text-[-10px] */
+	white-space: nowrap;
+}
+
