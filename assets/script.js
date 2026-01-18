@@ -1796,7 +1796,7 @@ onDomReady(() => {
 onDomReady(() => {
 	loadData()
 	runReveal() // expose common globals used by inline attributes
-	if (document.getElementById('cart-drawer')) Cart.init()
+	if (document.getElementById('cart-drawer')) CartDrawer.init()
 	window.openRoomViewer = openRoomViewer
 	window.closeViewer = closeViewer
 	window.nextViewerRoom = nextViewerRoom
@@ -2116,266 +2116,186 @@ onDomReady(() => {
 	initMenu()
 })
 
-/* -------------------- SIDE CART LOGIC -------------------- */
-const Cart = (function () {
-	// State
-	let items = []
-	let isOpen = false
+/* -------------------- AJAX CART DRAWER -------------------- */
+const CartDrawer = (function () {
 	let initialized = false
-	const FREE_SHIPPING_THRESHOLD = 500
-	let autoCloseTimer = null
+	let isOpen = false
 
-	// DOM Elements - lookup on demand to ensure availability
 	const getElements = () => ({
 		drawer: document.getElementById('cart-drawer'),
 		overlay: document.getElementById('cart-overlay'),
-		itemsContainer: document.getElementById('cart-items'),
-		footer: document.getElementById('cart-footer'),
-		subtotal: document.getElementById('cart-total'),
+		loader: document.querySelector('[data-cart-loader]'),
 		count: document.getElementById('cart-count'),
-		closeBtn: document.getElementById('close-cart-btn'),
 		headerCount: document.getElementById('header-cart-count'),
 	})
+
+	const setLoading = loading => {
+		const { loader, drawer } = getElements()
+		if (loader) {
+			loader.classList.toggle('hidden', !loading)
+			loader.classList.toggle('flex', loading)
+		}
+		if (drawer) drawer.setAttribute('aria-busy', loading ? 'true' : 'false')
+	}
+
+	const updateHeaderCount = count => {
+		const { headerCount } = getElements()
+		if (!headerCount) return
+		headerCount.textContent = count
+		count > 0
+			? headerCount.classList.remove('opacity-0', 'scale-0')
+			: headerCount.classList.add('opacity-0', 'scale-0')
+	}
+
+	async function fetchCartState() {
+		const response = await fetch('/cart.js', {
+			headers: { Accept: 'application/json' },
+		})
+		if (!response.ok) throw new Error('Cart fetch failed')
+		return response.json()
+	}
+
+	async function refresh() {
+		setLoading(true)
+		try {
+			const response = await fetch(`/?sections=cart-drawer`, {
+				headers: { Accept: 'application/json' },
+			})
+			const data = await response.json()
+			const sectionHtml = data && data['cart-drawer']
+			if (sectionHtml) {
+				const temp = document.createElement('div')
+				temp.innerHTML = sectionHtml
+				const newDrawer = temp.querySelector('#cart-drawer')
+				const newOverlay = temp.querySelector('#cart-overlay')
+				const currentDrawer = document.getElementById('cart-drawer')
+				const currentOverlay = document.getElementById('cart-overlay')
+				if (currentDrawer && newDrawer) {
+					currentDrawer.replaceWith(newDrawer)
+				}
+				if (currentOverlay && newOverlay) {
+					currentOverlay.replaceWith(newOverlay)
+				}
+			}
+			const cart = await fetchCartState()
+			updateHeaderCount(cart.item_count || 0)
+			if (isOpen) open()
+		} catch (err) {
+			console.warn('[CartDrawer] Refresh failed:', err)
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	function open() {
+		isOpen = true
+		const { drawer, overlay } = getElements()
+		if (drawer) drawer.classList.remove('translate-x-full')
+		if (overlay)
+			overlay.classList.remove('opacity-0', 'pointer-events-none')
+		document.body.style.overflow = 'hidden'
+	}
+
+	function close() {
+		isOpen = false
+		const { drawer, overlay } = getElements()
+		if (drawer) drawer.classList.add('translate-x-full')
+		if (overlay) overlay.classList.add('opacity-0', 'pointer-events-none')
+		document.body.style.overflow = ''
+	}
+
+	async function changeLine(key, quantity) {
+		if (!key) return
+		setLoading(true)
+		try {
+			const response = await fetch('/cart/change.js', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ id: key, quantity }),
+			})
+			if (!response.ok) throw new Error('Cart change failed')
+			await refresh()
+		} catch (err) {
+			console.warn('[CartDrawer] Change failed:', err)
+		} finally {
+			setLoading(false)
+		}
+	}
 
 	function init() {
 		if (initialized) return
 		initialized = true
-		const els = getElements()
-		// Event Listeners
-		if (els.closeBtn) els.closeBtn.addEventListener('click', close)
-		if (els.overlay)
-			els.overlay.addEventListener('click', e => {
-				if (e.target === els.overlay) close()
-			})
 
-		// Delegation for dynamic cart toggle button
 		document.addEventListener('click', e => {
 			const toggle = e.target.closest('#cart-toggle')
 			if (toggle) {
-				e.preventDefault() // Prevent navigation if href="#"
+				e.preventDefault()
 				open()
 			}
+		})
+
+		document.addEventListener('click', e => {
+			const closeBtn = e.target.closest('[data-cart-close]')
+			if (closeBtn) {
+				e.preventDefault()
+				close()
+			}
+		})
+
+		document.addEventListener('click', e => {
+			const overlay = e.target.closest('#cart-overlay')
+			if (overlay && e.target === overlay) close()
 		})
 
 		document.addEventListener('keydown', e => {
 			if (e.key === 'Escape' && isOpen) close()
 		})
 
-		// Hover to cancel auto-close
-		if (els.drawer) {
-			els.drawer.addEventListener('mouseenter', () => {
-				if (autoCloseTimer) clearTimeout(autoCloseTimer)
+		document.addEventListener('click', e => {
+			const actionBtn = e.target.closest('[data-cart-action]')
+			if (!actionBtn) return
+			e.preventDefault()
+			const key = actionBtn.getAttribute('data-key')
+			const action = actionBtn.getAttribute('data-cart-action')
+			const line = document.querySelector(
+				`[data-cart-line][data-key="${key}"]`,
+			)
+			const currentQty = parseInt(line?.dataset?.quantity || '0', 10)
+			if (action === 'remove') return changeLine(key, 0)
+			if (action === 'increase') return changeLine(key, currentQty + 1)
+			if (action === 'decrease')
+				return changeLine(key, Math.max(0, currentQty - 1))
+		})
+
+		document.addEventListener('submit', e => {
+			const form = e.target
+			if (!form || !form.action || !form.action.includes('/cart/add'))
+				return
+			e.preventDefault()
+			const formData = new FormData(form)
+			setLoading(true)
+			fetch('/cart/add.js', {
+				method: 'POST',
+				body: formData,
+				headers: { Accept: 'application/json' },
 			})
-		}
+				.then(res => {
+					if (!res.ok) throw new Error('Add to cart failed')
+					return refresh()
+				})
+				.then(open)
+				.catch(err => console.warn('[CartDrawer] Add failed:', err))
+				.finally(() => setLoading(false))
+		})
 
-		// Initial render to show empty cart state
-		render()
+		refresh()
 	}
 
-	function open() {
-		isOpen = true
-		const els = getElements()
-		if (els.drawer) els.drawer.classList.remove('translate-x-full')
-		if (els.overlay)
-			els.overlay.classList.remove('opacity-0', 'pointer-events-none')
-		document.body.style.overflow = 'hidden'
-	}
-
-	function close() {
-		isOpen = false
-		const els = getElements()
-		if (els.drawer) els.drawer.classList.add('translate-x-full')
-		if (els.overlay)
-			els.overlay.classList.add('opacity-0', 'pointer-events-none')
-		document.body.style.overflow = ''
-		if (autoCloseTimer) clearTimeout(autoCloseTimer)
-	}
-
-	// function openWithTimer(duration = 4000) {
-	// 	open()
-	// 	if (autoCloseTimer) clearTimeout(autoCloseTimer)
-	// 	autoCloseTimer = setTimeout(close, duration)
-	// }
-
-	function addItem(product, openCart = true) {
-		const productId = product.id || product.handle || Date.now().toString()
-		const qtyToAdd = product.quantity || 1
-		const existing = items.find(i => i.id === productId)
-		if (existing) {
-			existing.qty += qtyToAdd
-		} else {
-			items.push({ ...product, qty: qtyToAdd, id: productId })
-		}
-		render()
-		// if (openCart) {
-		// 	openWithTimer()
-		// }
-	}
-
-	function removeItem(id) {
-		items = items.filter(i => i.id !== id)
-		render()
-	}
-
-	function updateQty(id, delta) {
-		const item = items.find(i => i.id === id)
-		if (!item) return
-
-		item.qty += delta
-		if (item.qty <= 0) {
-			removeItem(id)
-		} else {
-			render()
-		}
-	}
-
-	function render() {
-		const els = getElements()
-		if (!els.drawer) return // Если нет самой корзины, ничего не делаем
-
-		// 1. Расчеты
-		const total = items.reduce(
-			(sum, item) => sum + item.price * item.qty,
-			0,
-		)
-		const totalQty = items.reduce((c, i) => c + i.qty, 0)
-
-		// 2. Обновление счетчиков в шапке
-		if (els.count) els.count.innerText = totalQty
-		if (els.headerCount) {
-			els.headerCount.innerText = totalQty
-			totalQty > 0
-				? els.headerCount.classList.remove('opacity-0', 'scale-0')
-				: els.headerCount.classList.add('opacity-0', 'scale-0')
-		}
-
-		// 3. Отрисовка товаров
-		if (els.itemsContainer) {
-			if (items.length === 0) {
-				els.itemsContainer.innerHTML = `
-                <div class='flex flex-col items-center justify-center h-full text-white/30 space-y-4'>
-                    <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'></circle><circle cx='20' cy='21' r='1'></circle><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'></path></svg>
-                    <p class='text-[10px] uppercase tracking-widest'>Your cart is empty</p>
-					<a href="${getCollectionsUrl()}" class="bg-white text-black p-4 lg:py-3 rounded-lg font-black uppercase text-[8px] lg:text-[9px] tracking-[0.2em] text-center hover:bg-purple-600 hover:text-white transition-all duration-300">
-								View the collection
-							</a>
-                </div>`
-			} else {
-				els.itemsContainer.innerHTML = items
-					.map(
-						item => `
-                <div class='flex gap-4 animate-[fadeIn_0.3s_ease-out] mb-6'>
-                    <div class='w-20 h-20 bg-white/5 rounded-lg overflow-hidden flex-shrink-0'>
-                        <img src='${
-							item.image || fallbackImage
-						}' class='w-full h-full object-cover' />
-                    </div>
-                    <div class='flex-1 flex flex-col justify-between py-1'>
-                        <div>
-                            <h4 class='text-white text-sm font-bold leading-tight'>${
-								item.title
-							}</h4>
-                            <p class='text-white/40 text-[10px] mt-1'>Price: $${
-								item.price
-							}</p>
-                        </div>
-                        <div class='flex items-center justify-between'>
-                            <div class='flex items-center gap-2 bg-white/5 rounded-lg px-2 py-1'>
-                                <button onclick='Cart.updateQty("${
-									item.id
-								}", -1)' class='text-white/50 hover:text-white px-1'>-</button>
-                                <span class='text-xs text-white/90 font-mono w-4 text-center'>${
-									item.qty
-								}</span>
-                                <button onclick='Cart.updateQty("${
-									item.id
-								}", 1)' class='text-white/50 hover:text-white px-1'>+</button>
-                            </div>
-                            <button onclick='Cart.removeItem("${
-								item.id
-							}")' class='text-red-500/50 hover:text-red-400 p-1'>
-                                <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='3 6 5 6 21 6'></polyline><path d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `,
-					)
-					.join('')
-			}
-		}
-
-		// 4. ДИНАМИЧЕСКИЙ ФУТЕР
-		// Проверяем, существует ли уже футер в DOM
-		let footer = document.getElementById('cart-footer')
-
-		if (items.length > 0) {
-			// Если товаров > 0 и футера еще нет — создаем его
-			if (!footer) {
-				footer = document.createElement('div')
-				footer.id = 'cart-footer'
-				footer.className = 'border-t border-white/5 bg-[#0d0d0d]'
-				els.drawer.appendChild(footer) // Добавляем в конец корзины
-			}
-
-			// Обновляем содержимое футера
-			footer.innerHTML = `
-           <div class="mt-auto p-6 bg-zinc-900/50 border-t border-white/5 backdrop-blur-xl">
-    <div class="flex justify-between items-center mb-1">
-        <div class="flex flex-col">
-            <span class="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold">Subtotal</span>
-            <span class="text-[9px] text-purple-400/60 uppercase tracking-widest">Final Price</span>
-        </div>
-        <div class="text-right">
-            <span class="text-3xl font-black tracking-tighter text-white">
-                <span class="text-purple-500 text-lg align-top mr-1">$</span>${total.toFixed(2)}
-            </span>
-        </div>
-    </div>
-
-    <div class="flex items-center gap-3 my-4">
-        <div class="h-px flex-1 bg-white/5"></div>
-        <p class="text-[9px] text-white/30 uppercase tracking-[0.1em] whitespace-nowrap">Tax & Shipping included</p>
-        <div class="h-px flex-1 bg-white/5"></div>
-    </div>
-
-    <button class="group relative w-full overflow-hidden rounded-2xl bg-white p-[1px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-        <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
-        <div class="relative flex items-center justify-center gap-2 bg-white group-hover:bg-transparent py-4 px-6 rounded-[15px] transition-colors duration-300">
-            <span class="text-black group-hover:text-white text-xs font-black uppercase tracking-[0.25em] transition-colors">
-                Secure Checkout
-            </span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-black group-hover:text-white group-hover:translate-x-1 transition-all">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-        </div>
-    </button>
-    
-    <div class="mt-4 flex justify-center gap-4 opacity-20 grayscale">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="h-3">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" class="h-5">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" class="h-3">
-    </div>
-</div>
-        `
-		} else {
-			// Если товаров 0 — удаляем футер совсем
-			if (footer) {
-				footer.remove()
-			}
-		}
-	}
-
-	// Expose public methods
 	return {
 		init,
 		open,
 		close,
-		addItem,
-		removeItem,
-		updateQty,
+		refresh,
 	}
 })()
 
@@ -2501,19 +2421,15 @@ async function addToCart(productInput) {
 
 	variantId = normalizeVariantId(variantId || selectedVariant?.id)
 
-	const cardScope = sourceEl?.closest?.('article, .group') || null
-	const fallbackTitle = cardScope?.querySelector('h3')?.textContent?.trim()
 	const ariaLabel = sourceEl?.getAttribute?.('aria-label') || ''
 	const ariaTitle = ariaLabel
 		.replace(/^Add\s+/i, '')
 		.replace(/\s+to\s+cart\s*$/i, '')
 		.trim()
-	const fallbackImage = cardScope?.querySelector('img')?.getAttribute('src')
 	const resolvedTitle =
 		product.title ||
 		productData?.title ||
 		sourceEl?.dataset?.title ||
-		fallbackTitle ||
 		ariaTitle ||
 		handle
 	const resolvedPrice =
@@ -2524,7 +2440,6 @@ async function addToCart(productInput) {
 	const resolvedImage = resolveAssetImage(
 		product.image ||
 			sourceEl?.dataset?.image ||
-			fallbackImage ||
 			selectedVariant?.featured_image?.src ||
 			productData?.featured_image,
 	)
@@ -2544,9 +2459,9 @@ async function addToCart(productInput) {
 	if (variantId) {
 		shopifyAdded = await addToCartShopify(variantId, localProduct.quantity)
 	}
-
-	if (typeof Cart !== 'undefined' && Cart.addItem) {
-		Cart.addItem(localProduct, true)
+	if (shopifyAdded) {
+		CartDrawer.refresh()
+		CartDrawer.open()
 	}
 
 	return { ok: shopifyAdded, product: localProduct }
@@ -2660,7 +2575,7 @@ function pulseBadge() {
 	}
 }
 
-// Cart.init() runs automatically when cart drawer exists on the page
+// CartDrawer.init() runs automatically when cart drawer exists on the page
 /* -------------------- Product Detail Page (PDP) Module -------------------- */
 ;(function ProductDetailPage() {
 	// State
