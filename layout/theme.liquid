@@ -24,6 +24,7 @@
 
     {{ 'style.css' | asset_url | stylesheet_tag }}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <link rel="stylesheet" href="https://cdn.judge.me/widget.css">
 
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
@@ -43,6 +44,7 @@
     </script>
 
     {{ content_for_header }}
+    <script defer src="https://cdn.judge.me/widget.js"></script>
   </head>
 
   <body>

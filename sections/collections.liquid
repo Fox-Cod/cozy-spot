@@ -78,7 +78,9 @@
 									<h3 class="text-lg font-black leading-tight hover:text-purple-400 transition-colors">{{ product.title | slice: 0, 27 }}</h3>
 								</a>
 								<div class="text-xs">
-									{{ product.metafields.judgeme.badge }}
+									<div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
+										{{ product.metafields.judgeme.badge }}
+									</div>
 								</div>
 								<div class="flex items-center justify-between pt-2">
 									<div class="text-lg font-mono font-bold">{{ product.price | money }}</div>

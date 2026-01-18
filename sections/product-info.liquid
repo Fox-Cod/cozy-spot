@@ -93,7 +93,9 @@
 
 				<!-- Judge.me Badge -->
 				<div class="mb-4">
-					{{ product.metafields.judgeme.badge }}
+					<div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
+						{{ product.metafields.judgeme.badge }}
+					</div>
 				</div>
 
 				<!-- Rating -->
@@ -367,7 +369,12 @@
 			<!-- Reviews Tab -->
 			<div id="tab-reviews" class="product-tab-content hidden">
 				<div class="max-w-3xl">
-					{{ product.metafields.judgeme.widget }}
+					<!-- Start of Judge.me code -->
+					<div class="jdgm-widget jdgm-widget-full" data-id="{{ product.id }}">
+						{{ product.metafields.judgeme.widget }}
+					</div>
+					<!-- End of Judge.me code -->
+					<!-- Start of Judge.me code --><div style='{{ jm_style }}' class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}' data-auto-install='false'>{{ product.metafields.judgeme.badge }}</div><!-- End of Judge.me code -->
 				</div>
 			</div>
 		</div>
