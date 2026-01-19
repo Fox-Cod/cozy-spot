@@ -11,7 +11,7 @@
 							{% if product.images.size > 0 %}
 								{% for image in product.images %}
 									<div class="swiper-slide">
-										<img src="{{ image | image_url: width: 1200 }}" alt="{{ product.title | escape }}" class="w-full h-full object-cover" />
+										<img src="{{ image | image_url: width: 1200 }}" alt="{{ product.title | escape }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" class="w-full h-full object-cover" />
 									</div>
 								{% endfor %}
 							{% endif %}
@@ -61,7 +61,7 @@
 						{% if product.images.size > 0 %}
 							{% for image in product.images %}
 								<div class="swiper-slide cursor-pointer opacity-50 hover:opacity-100 transition-opacity rounded-xl overflow-hidden border-2 border-transparent">
-									<img src="{{ image | image_url: width: 240 }}" alt="{{ product.title | escape }}" class="w-full h-full object-cover aspect-square" />
+									<img src="{{ image | image_url: width: 240 }}" alt="{{ product.title | escape }}" loading="lazy" class="w-full h-full object-cover aspect-square" />
 								</div>
 							{% endfor %}
 						{% endif %}

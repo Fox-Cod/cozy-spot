@@ -191,6 +191,209 @@ img {
 .nav-link:hover::after {
 	width: 100%;
 }
+
+/* Secret stash page */
+.secret-stash-page {
+	min-height: 100vh;
+	background:
+		radial-gradient(
+			1200px 600px at 20% 10%,
+			rgba(168, 85, 247, 0.18),
+			transparent 60%
+		),
+		radial-gradient(
+			900px 500px at 80% 0%,
+			rgba(59, 130, 246, 0.18),
+			transparent 55%
+		),
+		radial-gradient(
+			800px 800px at 50% 100%,
+			rgba(236, 72, 153, 0.14),
+			transparent 60%
+		),
+		#050505;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 80px 20px;
+}
+
+.secret-stash-wrap {
+	width: 100%;
+	max-width: 900px;
+}
+
+.secret-stash-inner {
+	background: rgba(8, 8, 8, 0.75);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(18px);
+	border-radius: 28px;
+	padding: 42px 36px;
+	text-align: center;
+}
+
+.secret-stash-badge {
+	display: inline-block;
+	padding: 6px 12px;
+	border-radius: 999px;
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.3em;
+	color: rgba(255, 255, 255, 0.7);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	margin-bottom: 14px;
+}
+
+.secret-stash-title {
+	font-size: clamp(28px, 6vw, 64px);
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 8px;
+}
+
+.secret-stash-subtitle {
+	font-size: 14px;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.6);
+	margin-bottom: 28px;
+}
+
+.secret-stash-card {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 20px;
+	align-items: center;
+	background: rgba(12, 12, 12, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 22px;
+	padding: 22px;
+	margin: 0 auto 18px;
+	max-width: 720px;
+}
+
+@media (min-width: 768px) {
+	.secret-stash-card {
+		grid-template-columns: 260px 1fr;
+		text-align: left;
+	}
+}
+
+.secret-stash-qr {
+	background: #0b0b0b;
+	border-radius: 18px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	padding: 14px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.secret-stash-qr img {
+	width: 100%;
+	height: auto;
+	display: block;
+	border-radius: 12px;
+}
+
+.secret-stash-code-label {
+	font-size: 12px;
+	letter-spacing: 0.3em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.5);
+	margin-bottom: 10px;
+}
+
+.secret-stash-code-value {
+	font-size: clamp(28px, 5vw, 44px);
+	font-weight: 800;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: #a855f7;
+	text-shadow: 0 0 18px rgba(168, 85, 247, 0.45);
+}
+
+.secret-stash-code-hint {
+	margin-top: 8px;
+	font-size: 12px;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.45);
+}
+
+.secret-stash-meta {
+	font-size: 10px;
+	letter-spacing: 0.4em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.35);
+}
+
+/* Cart attention animations */
+.site-nav.cart-attention {
+	z-index: 1200;
+}
+
+#cart-toggle.cart-attention {
+	animation: cart-bounce 0.6s ease;
+}
+
+#cart-toggle.cart-attention svg {
+	animation: cart-wiggle 0.6s ease;
+}
+
+#header-cart-count.cart-badge-attention {
+	animation: cart-badge-pop 0.6s ease;
+	box-shadow: 0 0 12px rgba(168, 85, 247, 0.7);
+}
+
+@keyframes cart-bounce {
+	0% {
+		transform: translateY(0) scale(1);
+	}
+	30% {
+		transform: translateY(-3px) scale(1.08);
+	}
+	60% {
+		transform: translateY(1px) scale(0.98);
+	}
+	100% {
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes cart-wiggle {
+	0% {
+		transform: rotate(0deg);
+	}
+	25% {
+		transform: rotate(-8deg);
+	}
+	50% {
+		transform: rotate(6deg);
+	}
+	75% {
+		transform: rotate(-4deg);
+	}
+	100% {
+		transform: rotate(0deg);
+	}
+}
+
+@keyframes cart-badge-pop {
+	0% {
+		transform: scale(0.6);
+		opacity: 0.4;
+	}
+	40% {
+		transform: scale(1.25);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
 .slider-boundary {
 	width: 100%;
 	overflow: hidden;

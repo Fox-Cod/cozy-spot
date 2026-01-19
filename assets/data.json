@@ -1,6 +1,6 @@
 {
 	"shopify_config": {
-		"store_domain": "cyij3a-x6.myshopify.com",
+		"store_domain": "cozy-spot.shop",
 		"storefront_access_token": "PASTE_STOREFRONT_TOKEN_HERE"
 	},
 
@@ -109,18 +109,34 @@
 			"image": "bio-01.jpg",
 			"hotspots": [
 				{
-					"top": "45%",
-					"left": "30%",
-					"shopify_handle": "cloud-neon-light-logo-usb-or-battery-powered-novel-night-light-used-to-decorate-girls-bedrooms-birthday-party-gifts-wedding",
+					"top": "74%",
+					"left": "50%",
+					"shopify_handle": "rgb-aluminum-alloy-clock-with-ips-desktop-design",
 					"fallback": {
-						"product_name": "Test Product",
-						"description": "Aluminum housing, warm ambient light. Perfect for late night coding sessions.",
-						"price": "89",
-						"currency": "€",
-						"img": "min-01.jpg",
-						"rating": "4.8",
-						"reviews_count": "124",
-						"category": "Workspace",
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "43%",
+					"left": "60%",
+					"shopify_handle": "pegboard-shelf",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
 						"link": "#"
 					}
 				}
@@ -131,14 +147,64 @@
 			"category": "Nature",
 			"title": "Nature Setup #02",
 			"image": "bio-02.jpg",
-			"hotspots": []
+			"hotspots": [
+				{
+					"top": "28%",
+					"left": "41%",
+					"shopify_handle": "triangle-modular-lights",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "31%",
+					"left": "24%",
+					"shopify_handle": "cloud-shaped-neon-sign",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				}
+			]
 		},
 		{
 			"id": "scene-3",
 			"category": "Nature",
 			"title": "Nature Setup #03",
 			"image": "bio-3.jpg",
-			"hotspots": []
+			"hotspots": [
+				{
+					"top": "15%",
+					"left": "45%",
+					"shopify_handle": "triangle-modular-lights",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				}
+			]
 		},
 		{
 			"id": "scene-4",

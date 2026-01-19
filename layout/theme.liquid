@@ -22,9 +22,29 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    {{ 'style.css' | asset_url | stylesheet_tag }}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    <link rel="stylesheet" href="https://cdn.judge.me/widget.css">
+    <link rel="preload" href="{{ 'style.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ 'style.css' | asset_url }}"></noscript>
+
+    {% assign needs_swiper = false %}
+    {% if request.page_type == 'index' or request.page_type == 'product' %}
+      {% assign needs_swiper = true %}
+    {% endif %}
+    {% if request.page_type == 'page' and page.handle == 'showcase' %}
+      {% assign needs_swiper = true %}
+    {% endif %}
+
+    {% assign needs_jdgm = false %}
+    {% if request.page_type == 'index' or request.page_type == 'product' or request.page_type == 'collection' or request.page_type == 'list-collections' or request.page_type == 'search' %}
+      {% assign needs_jdgm = true %}
+    {% endif %}
+
+    {% if needs_swiper %}
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    {% endif %}
+
+    {% if needs_jdgm %}
+      <link rel="stylesheet" href="https://cdn.judge.me/widget.css">
+    {% endif %}
 
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
@@ -33,7 +53,14 @@
 
     <script>
       window.CozySpot = window.CozySpot || {};
-      window.CozySpot.dataUrl = "{{ 'data.json' | asset_url }}";
+      {% assign needs_data = false %}
+      {% if request.page_type == 'index' %}
+        {% assign needs_data = true %}
+      {% endif %}
+      {% if request.page_type == 'page' and page.handle == 'showcase' %}
+        {% assign needs_data = true %}
+      {% endif %}
+      window.CozySpot.dataUrl = {% if needs_data %}"{{ 'data.json' | asset_url }}"{% else %}null{% endif %};
       window.CozySpot.fallbackImage = "{{ 'min-01.jpg' | asset_url }}";
       window.CozySpot.assetBase = "{{ 'min-01.jpg' | asset_url | split: 'min-01.jpg' | first }}";
       window.CozySpot.currencySymbol = {{ cart.currency.symbol | json }};
@@ -58,7 +85,9 @@
     </script>
 
     {{ content_for_header }}
-    <script defer src="https://cdn.judge.me/widget.js"></script>
+    {% if needs_jdgm %}
+      <script defer src="https://cdn.judge.me/widget.js"></script>
+    {% endif %}
   </head>
   <body>
     {% sections 'navigation-group' %}
@@ -67,7 +96,12 @@
 
     {% sections 'footer-group' %}
     {% section 'cart-drawer' %}
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    {% if needs_swiper %}
+      <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    {% endif %}
     {{ 'script.js' | asset_url | script_tag }}
+    {% if request.page_type == 'product' %}
+      {{ 'script-pdp.js' | asset_url | script_tag }}
+    {% endif %}
   </body>
 </html>

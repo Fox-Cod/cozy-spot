@@ -23,8 +23,8 @@
 		<div>CozySpot Interface v.4.0</div>
 	</div>
 
-<nav class="site-nav full-width fixed top-0 w-full z-[100] px-4 md:px-10 py-4 flex justify-between items-center bg-black/60 backdrop-blur-xl border-b border-white/5">
-	<a href="{{ routes.root_url }}#main" class="z-[110] relative text-white logo-link">
+<nav class="site-nav full-width fixed top-0 w-full z-[1200] px-4 md:px-10 py-4 flex justify-between items-center bg-black/60 backdrop-blur-xl border-b border-white/5">
+	<a href="{{ routes.root_url }}#main" class="z-[1210] relative text-white logo-link">
 		<img src="{{ 'cozy-wh-logo-64x.png' | asset_url }}" alt="CozySpot" class="h-7 w-7 md:h-8 md:w-8 object-contain" style="transform: scale(2.2); transform-origin: center;" />
 	</a>
 
@@ -34,9 +34,9 @@
 		<a href="{{ pages['about-us'].url | default: '/pages/about-us' }}" class="nav-link text-[11px] uppercase font-bold tracking-widest opacity-70 hover:opacity-100 transition">About us</a>
 	</div>
 
-	<div class="flex items-center gap-4 z-[110] relative">
+	<div class="flex items-center gap-4 z-[1210] relative">
 		<!-- Profile Icon -->
-		<button class="hover:opacity-60 transition" aria-label="Profile">
+		<a href="{{ routes.account_url }}" class="hover:opacity-60 transition" aria-label="Profile">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="20"
@@ -52,7 +52,7 @@
 				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
 				<circle cx="12" cy="7" r="4"></circle>
 			</svg>
-		</button>
+		</a>
 
 		<!-- Cart Icon -->
 		<button id="cart-toggle" class="relative hover:opacity-60 transition" aria-label="Shopping cart">

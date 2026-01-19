@@ -271,10 +271,13 @@ function openCartPanel() {
 
 // Live clock
 let _clockEl = null
-setInterval(() => {
-	if (!_clockEl) _clockEl = document.getElementById('live-clock')
-	if (_clockEl) _clockEl.textContent = new Date().toTimeString().split(' ')[0]
-}, 1000)
+if (document.getElementById('live-clock')) {
+	setInterval(() => {
+		if (!_clockEl) _clockEl = document.getElementById('live-clock')
+		if (_clockEl)
+			_clockEl.textContent = new Date().toTimeString().split(' ')[0]
+	}, 1000)
+}
 
 // Mouse coords reaction
 let _mouseTick = false,
@@ -282,24 +285,31 @@ let _mouseTick = false,
 	_mouseY = 0
 let _mainSpotEl = null,
 	_coordsEl = null
-document.addEventListener('mousemove', e => {
-	_mouseX = e.clientX
-	_mouseY = e.clientY
-	if (!_mouseTick) {
-		_mouseTick = true
-		requestAnimationFrame(() => {
-			const x = (_mouseX / window.innerWidth - 0.5) * 60
-			const y = (_mouseY / window.innerHeight - 0.5) * 60
-			if (!_mainSpotEl) _mainSpotEl = document.getElementById('main-spot')
-			if (_mainSpotEl)
-				_mainSpotEl.style.transform = `translate(${x}px, ${y}px)`
-			if (!_coordsEl) _coordsEl = document.getElementById('mouse-coords')
-			if (_coordsEl)
-				_coordsEl.textContent = `X: ${_mouseX} // Y: ${_mouseY}`
-			_mouseTick = false
-		})
-	}
-})
+if (
+	document.getElementById('main-spot') ||
+	document.getElementById('mouse-coords')
+) {
+	document.addEventListener('mousemove', e => {
+		_mouseX = e.clientX
+		_mouseY = e.clientY
+		if (!_mouseTick) {
+			_mouseTick = true
+			requestAnimationFrame(() => {
+				const x = (_mouseX / window.innerWidth - 0.5) * 60
+				const y = (_mouseY / window.innerHeight - 0.5) * 60
+				if (!_mainSpotEl)
+					_mainSpotEl = document.getElementById('main-spot')
+				if (_mainSpotEl)
+					_mainSpotEl.style.transform = `translate(${x}px, ${y}px)`
+				if (!_coordsEl)
+					_coordsEl = document.getElementById('mouse-coords')
+				if (_coordsEl)
+					_coordsEl.textContent = `X: ${_mouseX} // Y: ${_mouseY}`
+				_mouseTick = false
+			})
+		}
+	})
+}
 
 /* -------------------- Shopify Integration -------------------- */
 let shopifyConfig = null
@@ -549,7 +559,7 @@ async function loadData() {
 		renderGallery()
 		initDemoModule()
 		// if swiper exists, update floating products
-		if (typeof swiper !== 'undefined' && rooms && rooms.length)
+		if (swiper && rooms && rooms.length)
 			updateFloatingProducts(rooms[swiper.activeIndex % rooms.length])
 	} catch (err) {
 		console.error('Failed to load data.json', err)
@@ -798,47 +808,54 @@ async function updateFloatingProducts(room) {
 }
 
 /* -------------------- Swiper inits (kept similar to original) -------------------- */
-const swiper = new Swiper('.mySwiper', {
-	effect: 'coverflow',
-	centeredSlides: true,
-	slidesPerView: 'auto',
-	coverflowEffect: {
-		rotate: 0,
-		depth: 300,
-		modifier: 1.5,
-		slideShadows: false,
-	},
-	on: {
-		slideChangeTransitionStart() {
-			document.getElementById('prod-left')?.classList.remove('active')
-			document.getElementById('prod-right')?.classList.remove('active')
+let swiper = null
+if (typeof Swiper !== 'undefined' && document.querySelector('.mySwiper')) {
+	swiper = new Swiper('.mySwiper', {
+		effect: 'coverflow',
+		centeredSlides: true,
+		slidesPerView: 'auto',
+		coverflowEffect: {
+			rotate: 0,
+			depth: 300,
+			modifier: 1.5,
+			slideShadows: false,
 		},
-		slideChange() {
-			const room = rooms[this.activeIndex % rooms.length]
-			updateFloatingProducts(room)
-			if (room.products) {
-				document.getElementById('prod-img-left').src =
-					room.products.left.img
-				document.getElementById('prod-name-left').innerText =
-					room.products.left.name
-				document.getElementById('prod-price-left').innerText =
-					room.products.left.price
-				document.getElementById('prod-img-right').src =
-					room.products.right.img
-				document.getElementById('prod-name-right').innerText =
-					room.products.right.name
-				document.getElementById('prod-price-right').innerText =
-					room.products.right.price
-				setTimeout(() => {
-					document.getElementById('prod-left').classList.add('active')
-					document
-						.getElementById('prod-right')
-						.classList.add('active')
-				}, 300)
-			}
+		on: {
+			slideChangeTransitionStart() {
+				document.getElementById('prod-left')?.classList.remove('active')
+				document
+					.getElementById('prod-right')
+					?.classList.remove('active')
+			},
+			slideChange() {
+				const room = rooms[this.activeIndex % rooms.length]
+				updateFloatingProducts(room)
+				if (room.products) {
+					document.getElementById('prod-img-left').src =
+						room.products.left.img
+					document.getElementById('prod-name-left').innerText =
+						room.products.left.name
+					document.getElementById('prod-price-left').innerText =
+						room.products.left.price
+					document.getElementById('prod-img-right').src =
+						room.products.right.img
+					document.getElementById('prod-name-right').innerText =
+						room.products.right.name
+					document.getElementById('prod-price-right').innerText =
+						room.products.right.price
+					setTimeout(() => {
+						document
+							.getElementById('prod-left')
+							.classList.add('active')
+						document
+							.getElementById('prod-right')
+							.classList.add('active')
+					}, 300)
+				}
+			},
 		},
-	},
-})
+	})
+}
 
 /* -------------------- Reviews Marquee (kept modular) -------------------- */
 ;(function initReviewsMarquee() {
@@ -869,6 +886,7 @@ const swiper = new Swiper('.mySwiper', {
 			'.reviewsMarqueeSwiper .swiper-wrapper',
 		)
 		if (!wrapper) return
+		if (typeof Swiper === 'undefined') return
 		const slidesData = marqueeReviews.concat(marqueeReviews)
 		wrapper.innerHTML = slidesData
 			.map(
@@ -1388,69 +1406,80 @@ const _scrollEls = {
 	finalCta: null,
 	carouselSection: null,
 }
-window.addEventListener('scroll', () => {
-	if (!_scrollTick) {
-		_scrollTick = true
-		requestAnimationFrame(() => {
-			const winScroll =
-				document.body.scrollTop || document.documentElement.scrollTop
-			const height =
-				document.documentElement.scrollHeight -
-				document.documentElement.clientHeight
-			const scrolled = height ? (winScroll / height) * 100 : 0
-			const prog =
-				_scrollEls.progress ||
-				(_scrollEls.progress =
-					document.getElementById('scroll-progress'))
-			if (prog) prog.style.width = scrolled + '%'
-			const path =
-				_scrollEls.path ||
-				(_scrollEls.path = document.getElementById('drawing-path'))
-			const interactiveSection =
-				_scrollEls.interactiveSection ||
-				(_scrollEls.interactiveSection = document.getElementById(
-					'interactive-product-flow',
-				))
-			const finalCta =
-				_scrollEls.finalCta ||
-				(_scrollEls.finalCta = document.getElementById(
-					'final-collection-cta',
-				))
-			const carouselSection =
-				_scrollEls.carouselSection ||
-				(_scrollEls.carouselSection =
-					document.getElementById('collection'))
-			if (path && interactiveSection && finalCta && carouselSection) {
-				const sectionRect = interactiveSection.getBoundingClientRect()
-				const pathLength = path.getTotalLength()
-				if (
-					sectionRect.top < window.innerHeight &&
-					sectionRect.bottom > 0
-				) {
-					const scrollStart =
-						interactiveSection.offsetTop - window.innerHeight
-					const scrollEnd =
-						interactiveSection.offsetTop +
-						interactiveSection.offsetHeight -
-						window.innerHeight
-					let scrollProgress =
-						(window.pageYOffset - scrollStart) /
-						(scrollEnd - scrollStart)
-					scrollProgress = Math.max(0, Math.min(1, scrollProgress))
-					path.style.strokeDashoffset =
-						pathLength - pathLength * scrollProgress
-				} else path.style.strokeDashoffset = pathLength
-				const finalCtaRect = finalCta.getBoundingClientRect()
-				if (
-					finalCtaRect.top < window.innerHeight * 0.7 &&
-					!carouselSection.classList.contains('active')
-				)
-					carouselSection.classList.add('active')
-			}
-			_scrollTick = false
-		})
-	}
-})
+const hasScrollTargets =
+	document.getElementById('scroll-progress') ||
+	document.getElementById('interactive-product-flow') ||
+	document.getElementById('drawing-path')
+if (hasScrollTargets) {
+	window.addEventListener('scroll', () => {
+		if (!_scrollTick) {
+			_scrollTick = true
+			requestAnimationFrame(() => {
+				const winScroll =
+					document.body.scrollTop ||
+					document.documentElement.scrollTop
+				const height =
+					document.documentElement.scrollHeight -
+					document.documentElement.clientHeight
+				const scrolled = height ? (winScroll / height) * 100 : 0
+				const prog =
+					_scrollEls.progress ||
+					(_scrollEls.progress =
+						document.getElementById('scroll-progress'))
+				if (prog) prog.style.width = scrolled + '%'
+				const path =
+					_scrollEls.path ||
+					(_scrollEls.path = document.getElementById('drawing-path'))
+				const interactiveSection =
+					_scrollEls.interactiveSection ||
+					(_scrollEls.interactiveSection = document.getElementById(
+						'interactive-product-flow',
+					))
+				const finalCta =
+					_scrollEls.finalCta ||
+					(_scrollEls.finalCta = document.getElementById(
+						'final-collection-cta',
+					))
+				const carouselSection =
+					_scrollEls.carouselSection ||
+					(_scrollEls.carouselSection =
+						document.getElementById('collection'))
+				if (path && interactiveSection && finalCta && carouselSection) {
+					const sectionRect =
+						interactiveSection.getBoundingClientRect()
+					const pathLength = path.getTotalLength()
+					if (
+						sectionRect.top < window.innerHeight &&
+						sectionRect.bottom > 0
+					) {
+						const scrollStart =
+							interactiveSection.offsetTop - window.innerHeight
+						const scrollEnd =
+							interactiveSection.offsetTop +
+							interactiveSection.offsetHeight -
+							window.innerHeight
+						let scrollProgress =
+							(window.pageYOffset - scrollStart) /
+							(scrollEnd - scrollStart)
+						scrollProgress = Math.max(
+							0,
+							Math.min(1, scrollProgress),
+						)
+						path.style.strokeDashoffset =
+							pathLength - pathLength * scrollProgress
+					} else path.style.strokeDashoffset = pathLength
+					const finalCtaRect = finalCta.getBoundingClientRect()
+					if (
+						finalCtaRect.top < window.innerHeight * 0.7 &&
+						!carouselSection.classList.contains('active')
+					)
+						carouselSection.classList.add('active')
+				}
+				_scrollTick = false
+			})
+		}
+	})
+}
 
 function generateLinePath() {
 	const origin = document.getElementById('scroll-origin')
@@ -1494,8 +1523,13 @@ function scrollToElementWithOffset(target, offset = 100) {
 	window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
 }
 
-window.addEventListener('load', generateLinePath)
-window.addEventListener('resize', generateLinePath)
+const hasLinePathTargets =
+	document.getElementById('interactive-line-svg') &&
+	document.getElementById('drawing-path')
+if (hasLinePathTargets) {
+	window.addEventListener('load', generateLinePath)
+	window.addEventListener('resize', generateLinePath)
+}
 
 document
 	.querySelector('a[href="#interactive-product-flow"]')
@@ -1514,28 +1548,35 @@ document
 		scrollToElementWithOffset(targetElement, 100)
 	})
 
-const mainDemoSwiper = new Swiper('.mainDemoSwiper', {
-	effect: 'coverflow',
-	centeredSlides: true,
-	slidesPerView: 'auto',
-	coverflowEffect: {
-		rotate: 0,
-		depth: 300,
-		modifier: 1.5,
-		slideShadows: false,
-	},
-	fadeEffect: { crossFade: true },
-	loop: true,
-	pagination: {
-		el: '.swiper-pagination',
-		clickable: true,
-		dynamicBullets: true,
-	},
-	autoplay: { delay: 7000 },
-})
+if (
+	typeof Swiper !== 'undefined' &&
+	document.querySelector('.mainDemoSwiper')
+) {
+	const mainDemoSwiper = new Swiper('.mainDemoSwiper', {
+		effect: 'coverflow',
+		centeredSlides: true,
+		slidesPerView: 'auto',
+		coverflowEffect: {
+			rotate: 0,
+			depth: 300,
+			modifier: 1.5,
+			slideShadows: false,
+		},
+		fadeEffect: { crossFade: true },
+		loop: true,
+		pagination: {
+			el: '.swiper-pagination',
+			clickable: true,
+			dynamicBullets: true,
+		},
+		autoplay: { delay: 7000 },
+	})
+}
 
-window.addEventListener('scroll', runReveal)
-window.addEventListener('load', runReveal)
+if (document.querySelector('.reveal')) {
+	window.addEventListener('scroll', runReveal)
+	window.addEventListener('load', runReveal)
+}
 
 /* -------------------- Gallery render (when #gallery-grid exists) -------------------- */
 function renderGallery() {
@@ -1616,13 +1657,15 @@ function initDemoModule() {
 			})
 			.join('')
 
-		new Swiper('.demoPreviewSwiper', {
-			effect: 'fade',
-			fadeEffect: { crossFade: true },
-			autoplay: { delay: 3000, disableOnInteraction: false },
-			loop: true,
-			speed: 800,
-		})
+		if (typeof Swiper !== 'undefined') {
+			new Swiper('.demoPreviewSwiper', {
+				effect: 'fade',
+				fadeEffect: { crossFade: true },
+				autoplay: { delay: 3000, disableOnInteraction: false },
+				loop: true,
+				speed: 800,
+			})
+		}
 	}
 
 	// Legacy demo swiper support (if exists)
@@ -1647,12 +1690,15 @@ function initDemoModule() {
 					.join('')}</div>`,
 		)
 		.join('')
-	const demoSwiper = new Swiper('.mainDemoSwiper', {
-		effect: 'fade',
-		fadeEffect: { crossFade: true },
-		pagination: { el: '.swiper-pagination', clickable: true },
-		loop: false,
-	})
+	let demoSwiper = null
+	if (typeof Swiper !== 'undefined') {
+		demoSwiper = new Swiper('.mainDemoSwiper', {
+			effect: 'fade',
+			fadeEffect: { crossFade: true },
+			pagination: { el: '.swiper-pagination', clickable: true },
+			loop: false,
+		})
+	}
 }
 
 function openSheet(roomIdxOrSpot, spotIdx) {
@@ -1853,6 +1899,7 @@ function initGalleryHero() {
 	}
 
 	// Swiper initialization
+	if (typeof Swiper === 'undefined') return
 	window.galleryHeroSwiper = new Swiper('.galleryHeroSwiper', {
 		loop: true,
 		// Default settings (for mobile)
@@ -1886,6 +1933,8 @@ onDomReady(() => {
 	// Wait for loadData to finish (it's async),
 	// so we use simple polling or intercept execution.
 	// Most reliable approach without changing the top of the script:
+	const heroWrapper = document.getElementById('gallery-hero-wrapper')
+	if (!heroWrapper) return
 
 	const checkDataInterval = setInterval(() => {
 		if (typeof rooms !== 'undefined' && rooms.length > 0) {
@@ -1898,6 +1947,7 @@ onDomReady(() => {
 function initSpaceSwitcher() {
 	const word = document.getElementById('changing-word')
 	const decoContainer = document.getElementById('deco-layers-container')
+	if (!word || !decoContainer) return
 
 	const themes = [
 		{
@@ -2146,14 +2196,6 @@ const CartDrawer = (function () {
 			: headerCount.classList.add('opacity-0', 'scale-0')
 	}
 
-	async function fetchCartState() {
-		const response = await fetch('/cart.js', {
-			headers: { Accept: 'application/json' },
-		})
-		if (!response.ok) throw new Error('Cart fetch failed')
-		return response.json()
-	}
-
 	async function refresh() {
 		setLoading(true)
 		try {
@@ -2162,6 +2204,7 @@ const CartDrawer = (function () {
 			})
 			const data = await response.json()
 			const sectionHtml = data && data['cart-drawer']
+			let itemCount = null
 			if (sectionHtml) {
 				const temp = document.createElement('div')
 				temp.innerHTML = sectionHtml
@@ -2169,6 +2212,10 @@ const CartDrawer = (function () {
 				const newOverlay = temp.querySelector('#cart-overlay')
 				const currentDrawer = document.getElementById('cart-drawer')
 				const currentOverlay = document.getElementById('cart-overlay')
+				const countEl = temp.querySelector('[data-cart-count]')
+				const countValue = countEl ? countEl.textContent : null
+				const parsedCount = countValue ? parseInt(countValue, 10) : NaN
+				itemCount = Number.isNaN(parsedCount) ? null : parsedCount
 				if (currentDrawer && newDrawer) {
 					currentDrawer.replaceWith(newDrawer)
 				}
@@ -2176,8 +2223,17 @@ const CartDrawer = (function () {
 					currentOverlay.replaceWith(newOverlay)
 				}
 			}
-			const cart = await fetchCartState()
-			updateHeaderCount(cart.item_count || 0)
+			if (itemCount === null) {
+				const fallbackResponse = await fetch('/cart.js', {
+					headers: { Accept: 'application/json' },
+				})
+				if (fallbackResponse.ok) {
+					const cart = await fallbackResponse.json()
+					updateHeaderCount(cart.item_count || 0)
+				}
+			} else {
+				updateHeaderCount(itemCount)
+			}
 			if (isOpen) open()
 		} catch (err) {
 			console.warn('[CartDrawer] Refresh failed:', err)
@@ -2459,6 +2515,7 @@ async function addToCart(productInput) {
 	}
 	if (shopifyAdded) {
 		CartDrawer.refresh()
+		triggerCartAttention()
 	}
 
 	return { ok: shopifyAdded, product: localProduct }
@@ -2559,1001 +2616,32 @@ window.addAnimationProductToCart = function (buttonEl) {
 	}
 }
 
+function triggerCartAttention() {
+	const cartBtn = document.getElementById('cart-toggle')
+	const badge = document.getElementById('header-cart-count')
+	const nav = document.querySelector('.site-nav')
+
+	if (nav) nav.classList.add('cart-attention')
+
+	if (badge) {
+		badge.classList.remove('opacity-0', 'scale-0')
+		badge.classList.add('cart-badge-attention')
+	}
+
+	if (cartBtn) {
+		cartBtn.classList.add('cart-attention')
+	}
+
+	setTimeout(() => {
+		if (nav) nav.classList.remove('cart-attention')
+		if (badge) badge.classList.remove('cart-badge-attention')
+		if (cartBtn) cartBtn.classList.remove('cart-attention')
+	}, 700)
+}
+
 // Cart badge pulse
 function pulseBadge() {
-	const badge = document.getElementById('header-cart-count')
-	if (badge) {
-		badge.classList.remove('scale-100')
-		badge.classList.add('scale-125', 'bg-purple-600')
-		setTimeout(() => {
-			badge.classList.remove('scale-125', 'bg-purple-600')
-			badge.classList.add('scale-100')
-		}, 200)
-	}
+	triggerCartAttention()
 }
 
 // CartDrawer.init() runs automatically when cart drawer exists on the page
-/* -------------------- Product Detail Page (PDP) Module -------------------- */
-;(function ProductDetailPage() {
-	// State
-	let currentProduct = null
-	let selectedVariant = null
-	let productData = {}
-	let productMainSwiper = null
-	let productThumbsSwiper = null
-	let productLightboxSwiper = null
-	let relatedProductsSwiper = null
-	let productScenesSwiper = null
-
-	// Get product handle from URL
-	function getProductHandleFromURL() {
-		if (CozySpotConfig.productHandle) return CozySpotConfig.productHandle
-		const params = new URLSearchParams(window.location.search)
-		return (
-			params.get('handle') || params.get('product') || 'test-product-lamp'
-		)
-	}
-
-	// Initialize PDP
-	async function initProductPage() {
-		const handle = getProductHandleFromURL()
-		console.log('[PDP] Initializing product page for:', handle)
-
-		// Show loading state
-		showLoadingState()
-
-		if (CozySpotConfig.productData && CozySpotConfig.productData.handle) {
-			const mapped = mapLiquidProductToPdp(CozySpotConfig.productData)
-			if (mapped) {
-				currentProduct = mapped
-				productData = {}
-				renderProductPage(mapped)
-				initProductSwipers()
-				initMobileStickyBar()
-				updateSEOMeta(mapped)
-				console.log('[PDP] Product loaded from Liquid:', mapped)
-				return
-			}
-		}
-
-		try {
-			// Load data.json
-			if (!dataUrl) {
-				showErrorState('Data source not configured')
-				return
-			}
-			const response = await fetch(dataUrl)
-			const data = await response.json()
-
-			// Store shopify config
-			if (data.shopify_config) {
-				shopifyConfig = data.shopify_config
-			}
-
-			// Try to get product from Shopify first, then fallback
-			let product = null
-
-			if (
-				shopifyConfig?.store_domain &&
-				shopifyConfig?.storefront_access_token !==
-					'YOUR_STOREFRONT_ACCESS_TOKEN'
-			) {
-				product = await fetchShopifyProductDetail(handle)
-			}
-
-			// Fallback to local data
-			if (
-				!product &&
-				data.product_details &&
-				data.product_details[handle]
-			) {
-				const localProduct = data.product_details[handle]
-				product = {
-					source: 'fallback',
-					handle: localProduct.shopify_handle,
-					...localProduct.fallback,
-				}
-			}
-
-			if (!product) {
-				showErrorState('Product not found')
-				return
-			}
-
-			currentProduct = product
-			productData = data
-
-			// Render product
-			renderProductPage(product)
-
-			// Init swipers
-			initProductSwipers()
-
-			// Init sticky mobile bar
-			initMobileStickyBar()
-
-			// Load related products
-			loadRelatedProducts(data, handle)
-
-			// Load scenes with this product
-			loadProductScenes(data, handle)
-
-			// Update SEO meta
-			updateSEOMeta(product)
-
-			console.log('[PDP] Product loaded:', product)
-		} catch (error) {
-			console.error('[PDP] Failed to load product:', error)
-			showErrorState('Failed to load product')
-		}
-	}
-
-	// Fetch product detail from Shopify with extended fields
-	async function fetchShopifyProductDetail(handle) {
-		if (
-			!shopifyConfig?.store_domain ||
-			!shopifyConfig?.storefront_access_token
-		) {
-			return null
-		}
-
-		const query = `{
-			product(handle: "${handle}") {
-				id
-				handle
-				title
-				descriptionHtml
-				description
-				vendor
-				productType
-				tags
-				images(first: 10) {
-					edges {
-						node {
-							url
-							altText
-							width
-							height
-						}
-					}
-				}
-				variants(first: 20) {
-					edges {
-						node {
-							id
-							title
-							sku
-							availableForSale
-							quantityAvailable
-							price { amount currencyCode }
-							compareAtPrice { amount }
-							selectedOptions { name value }
-							image { url }
-						}
-					}
-				}
-				options {
-					name
-					values
-				}
-			}
-		}`
-
-		try {
-			const response = await fetch(
-				`https://${shopifyConfig.store_domain}/api/2024-01/graphql.json`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'X-Shopify-Storefront-Access-Token':
-							shopifyConfig.storefront_access_token,
-					},
-					body: JSON.stringify({ query }),
-				},
-			)
-
-			if (!response.ok) return null
-
-			const data = await response.json()
-			const product = data?.data?.product
-
-			if (product) {
-				return {
-					source: 'shopify',
-					id: product.id,
-					handle: product.handle,
-					title: product.title,
-					description: product.description,
-					full_description: product.descriptionHtml,
-					vendor: product.vendor,
-					category: product.productType,
-					tags: product.tags,
-					images: product.images?.edges?.map(e => e.node.url) || [],
-					price: product.variants?.edges?.[0]?.node?.price?.amount,
-					old_price:
-						product.variants?.edges?.[0]?.node?.compareAtPrice
-							?.amount,
-					currency:
-						product.variants?.edges?.[0]?.node?.price
-							?.currencyCode === 'EUR'
-							? '€'
-							: '$',
-					sku: product.variants?.edges?.[0]?.node?.sku,
-					available:
-						product.variants?.edges?.[0]?.node?.availableForSale,
-					quantity_available:
-						product.variants?.edges?.[0]?.node?.quantityAvailable,
-					variants:
-						product.variants?.edges?.map(e => ({
-							id: e.node.id,
-							title: e.node.title,
-							sku: e.node.sku,
-							available: e.node.availableForSale,
-							price: e.node.price?.amount,
-							image: e.node.image?.url,
-							options: e.node.selectedOptions,
-						})) || [],
-					options: product.options || [],
-				}
-			}
-			return null
-		} catch (err) {
-			console.error('[PDP] Shopify fetch error:', err)
-			return null
-		}
-	}
-
-	// Show loading state
-	function showLoadingState() {
-		const title = document.getElementById('product-title')
-		if (title) title.textContent = 'Loading...'
-	}
-
-	// Show error state
-	function showErrorState(message) {
-		const title = document.getElementById('product-title')
-		if (title) title.textContent = message
-
-		const desc = document.getElementById('product-short-description')
-		if (desc)
-			desc.textContent = 'Please check the product URL and try again.'
-	}
-
-	// Render product page
-	function renderProductPage(product) {
-		// Source indicator
-		const sourceEl = document.getElementById('product-source')
-
-		// Breadcrumbs
-		const breadCategory = document.getElementById('breadcrumb-category')
-		const breadProduct = document.getElementById('breadcrumb-product')
-		if (breadCategory)
-			breadCategory.textContent = product.category || 'Products'
-		if (breadProduct) breadProduct.textContent = product.title
-
-		// Category
-		const categoryEl = document.getElementById('product-category')
-		if (categoryEl) categoryEl.textContent = product.category || 'Product'
-
-		// Title
-		const titleEl = document.getElementById('product-title')
-		if (titleEl) titleEl.textContent = product.title
-
-		// Price
-		const priceEl = document.getElementById('product-price')
-		const oldPriceEl = document.getElementById('product-old-price')
-		const discountEl = document.getElementById('product-discount')
-		const currency = product.currency || '$'
-		const numericPrice = parseFloat(product.price)
-		const numericOldPrice = parseFloat(product.old_price)
-		const hasDiscount =
-			!Number.isNaN(numericOldPrice) &&
-			!Number.isNaN(numericPrice) &&
-			numericOldPrice > numericPrice
-
-		if (priceEl && product.price) {
-			priceEl.textContent = `${currency}${product.price}`
-		}
-
-		if (oldPriceEl && discountEl) {
-			if (hasDiscount) {
-				oldPriceEl.textContent = `${currency}${product.old_price}`
-				oldPriceEl.classList.remove('hidden')
-
-				const discount = Math.round(
-					(1 - numericPrice / numericOldPrice) * 100,
-				)
-				discountEl.textContent = `-${discount}%`
-				discountEl.classList.remove('hidden')
-			} else {
-				oldPriceEl.classList.add('hidden')
-				discountEl.classList.add('hidden')
-			}
-		}
-
-		// Description
-		const descEl = document.getElementById('product-short-description')
-		if (descEl) descEl.textContent = product.description || ''
-
-		// Full description
-		const fullDescEl = document.getElementById('product-full-description')
-		if (fullDescEl && product.full_description) {
-			fullDescEl.innerHTML = product.full_description
-		}
-
-		// Images
-		renderProductImages(product.images || [])
-
-		// Badge
-		const badgeEl = document.getElementById('product-badge')
-		if (badgeEl && product.badge) {
-			badgeEl.textContent = product.badge
-			badgeEl.classList.remove('hidden')
-			if (product.badge_style === 'hot') {
-				badgeEl.classList.add('bg-red-500')
-			}
-		}
-
-		// Variants
-		renderVariants(product)
-
-		// Stock
-		const stockEl = document.getElementById('product-stock')
-		if (stockEl) {
-			if (product.available) {
-				const qty = product.quantity_available
-				if (qty && qty < 10) {
-					stockEl.innerHTML = `<span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Only ${qty} left`
-				} else {
-					stockEl.innerHTML = `<span class="w-2 h-2 bg-green-500 rounded-full inline-block mr-1"></span>In Stock`
-				}
-			} else {
-				stockEl.innerHTML = `<span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Out of Stock`
-				// Disable add to cart
-				const addBtn = document.getElementById('add-to-cart-btn')
-				if (addBtn) {
-					addBtn.disabled = true
-					addBtn.classList.add('opacity-50', 'cursor-not-allowed')
-					addBtn.classList.remove('hover:bg-gray-200')
-				}
-			}
-		}
-
-		// SKU
-		const skuEl = document.getElementById('product-sku')
-		if (skuEl) skuEl.textContent = product.sku || 'N/A'
-
-		// Vendor
-		const vendorEl = document.getElementById('product-vendor')
-		if (vendorEl) vendorEl.textContent = product.vendor || 'CozySpot'
-
-		// Specifications
-		renderSpecifications(product.specifications || {})
-
-		// Mobile sticky bar
-		const stickyPrice = document.getElementById('sticky-price')
-		const stickyTitle = document.getElementById('sticky-title')
-		if (stickyPrice) stickyPrice.textContent = `${currency}${product.price}`
-		if (stickyTitle) stickyTitle.textContent = product.title
-	}
-
-	function updateVariantPriceDisplay(price) {
-		if (!currentProduct || price === null || price === undefined) return
-		const priceEl = document.getElementById('product-price')
-		const stickyPrice = document.getElementById('sticky-price')
-		const currency = currentProduct.currency || '€'
-		if (priceEl) priceEl.textContent = `${currency}${price}`
-		if (stickyPrice) stickyPrice.textContent = `${currency}${price}`
-	}
-
-	function updateAddToCartButtonVariant(variant) {
-		const addBtn = document.getElementById('add-to-cart-btn')
-		if (!addBtn || !variant) return
-		addBtn.dataset.variantId = variant.id || ''
-		if (variant.price) addBtn.dataset.price = variant.price
-		if (variant.image)
-			addBtn.dataset.image = resolveAssetImage(variant.image)
-	}
-
-	// Render product images
-	function renderProductImages(images) {
-		const mainWrapper = document.getElementById('product-main-images')
-		const thumbsWrapper = document.getElementById('product-thumbnails')
-		const lightboxWrapper = document.getElementById('lightbox-images')
-
-		if (!images.length) {
-			images = [fallbackImage] // Default image
-		}
-
-		images = images.map(img => resolveAssetImage(img))
-
-		// Main images
-		if (mainWrapper) {
-			mainWrapper.innerHTML = images
-				.map(
-					(img, i) => `
-				<div class="swiper-slide">
-					<img src="${img}" alt="Product image ${i + 1}" class="w-full h-full object-cover" />
-				</div>
-			`,
-				)
-				.join('')
-		}
-
-		// Thumbnails
-		if (thumbsWrapper) {
-			thumbsWrapper.innerHTML = images
-				.map(
-					(img, i) => `
-				<div class="swiper-slide cursor-pointer opacity-50 hover:opacity-100 transition-opacity rounded-xl overflow-hidden border-2 border-transparent">
-					<img src="${img}" alt="Thumbnail ${i + 1}" class="w-full h-full object-cover aspect-square" />
-				</div>
-			`,
-				)
-				.join('')
-		}
-
-		// Lightbox images
-		if (lightboxWrapper) {
-			lightboxWrapper.innerHTML = images
-				.map(
-					(img, i) => `
-				<div class="swiper-slide flex items-center justify-center">
-					<img src="${img}" alt="Product image ${i + 1}" class="max-w-full max-h-[80vh] object-contain rounded-xl" />
-				</div>
-			`,
-				)
-				.join('')
-		}
-	}
-
-	// Render variants
-	function renderVariants(product) {
-		const variants = product.variants || []
-		if (!variants.length) return
-
-		// Check for color variants
-		const colorVariants = variants.filter(v => v.color)
-		if (colorVariants.length) {
-			const colorSection = document.getElementById(
-				'variant-color-section',
-			)
-			const colorContainer = document.getElementById('variant-colors')
-
-			if (colorSection && colorContainer) {
-				colorSection.classList.remove('hidden')
-				colorContainer.innerHTML = colorVariants
-					.map(
-						(v, i) => `
-					<button 
-						class="variant-color-btn w-10 h-10 rounded-full border-2 ${i === 0 ? 'border-purple-500 ring-2 ring-purple-500/30' : 'border-white/20'} ${!v.available ? 'opacity-30 cursor-not-allowed relative' : ''} transition-all hover:scale-110"
-						style="background-color: ${v.color}"
-						data-variant-id="${v.id}"
-						data-variant-title="${v.title}"
-						data-variant-price="${v.price || product.price}"
-						data-image-index="${v.image_index || 0}"
-						${!v.available ? 'disabled title="Out of stock"' : ''}
-						onclick="selectColorVariant(this)"
-					>
-						${!v.available ? '<span class="absolute inset-0 flex items-center justify-center"><span class="w-full h-0.5 bg-red-500 rotate-45 absolute"></span></span>' : ''}
-					</button>
-				`,
-					)
-					.join('')
-
-				// Set initial selected color
-				const selectedName = document.getElementById(
-					'selected-color-name',
-				)
-				if (selectedName && colorVariants[0]) {
-					selectedName.textContent = colorVariants[0].title
-					selectedVariant = colorVariants[0]
-					updateAddToCartButtonVariant(selectedVariant)
-				}
-			}
-		}
-
-		// Check for size variants (non-color variants)
-		const sizeVariants = variants.filter(v => !v.color && v.title)
-		if (sizeVariants.length) {
-			const sizeSection = document.getElementById('variant-size-section')
-			const sizeContainer = document.getElementById('variant-sizes')
-
-			if (sizeSection && sizeContainer) {
-				sizeSection.classList.remove('hidden')
-				sizeContainer.innerHTML = sizeVariants
-					.map(
-						(v, i) => `
-					<button 
-						class="variant-size-btn px-4 py-2 border ${i === 0 ? 'border-purple-500 bg-purple-500/10 text-white' : 'border-white/20 text-white/60'} ${!v.available ? 'opacity-30 cursor-not-allowed line-through' : 'hover:border-white/40'} rounded-lg text-sm transition-all"
-						data-variant-id="${v.id}"
-						data-variant-price="${v.price || product.price}"
-						${!v.available ? 'disabled' : ''}
-						onclick="selectSizeVariant(this)"
-					>
-						${v.title}
-					</button>
-				`,
-					)
-					.join('')
-
-				if (sizeVariants[0]) {
-					selectedVariant = sizeVariants[0]
-					updateAddToCartButtonVariant(selectedVariant)
-					updateVariantPriceDisplay(selectedVariant.price)
-				}
-			}
-		}
-	}
-
-	// Render specifications table
-	function renderSpecifications(specs) {
-		const tableBody = document.getElementById('product-specs-table')
-		if (!tableBody || !Object.keys(specs).length) return
-
-		tableBody.innerHTML = Object.entries(specs)
-			.map(
-				([key, value]) => `
-			<tr class="border-b border-white/5">
-				<td class="py-4 text-white/40 text-sm w-1/3">${key}</td>
-				<td class="py-4 text-white text-sm">${value}</td>
-			</tr>
-		`,
-			)
-			.join('')
-	}
-
-	// Init product swipers
-	function initProductSwipers() {
-		// Thumbnails swiper
-		productThumbsSwiper = new Swiper('.productThumbsSwiper', {
-			spaceBetween: 10,
-			slidesPerView: 4,
-			freeMode: true,
-			watchSlidesProgress: true,
-		})
-
-		// Main swiper
-		productMainSwiper = new Swiper('.productMainSwiper', {
-			spaceBetween: 10,
-			navigation: {
-				nextEl: '.product-gallery-next',
-				prevEl: '.product-gallery-prev',
-			},
-			thumbs: {
-				swiper: productThumbsSwiper,
-			},
-			on: {
-				slideChange: function () {
-					// Update thumbnail active state
-					const thumbs = document.querySelectorAll(
-						'.productThumbsSwiper .swiper-slide',
-					)
-					thumbs.forEach((thumb, i) => {
-						if (i === this.activeIndex) {
-							thumb.classList.remove(
-								'opacity-50',
-								'border-transparent',
-							)
-							thumb.classList.add(
-								'opacity-100',
-								'border-purple-500',
-							)
-						} else {
-							thumb.classList.add(
-								'opacity-50',
-								'border-transparent',
-							)
-							thumb.classList.remove(
-								'opacity-100',
-								'border-purple-500',
-							)
-						}
-					})
-				},
-			},
-		})
-
-		// Lightbox swiper
-		productLightboxSwiper = new Swiper('.productLightboxSwiper', {
-			spaceBetween: 30,
-			navigation: {
-				nextEl: '.lightbox-next',
-				prevEl: '.lightbox-prev',
-			},
-		})
-
-		// Related products swiper
-		relatedProductsSwiper = new Swiper('.relatedProductsSwiper', {
-			spaceBetween: 20,
-			slidesPerView: 1,
-			breakpoints: {
-				640: { slidesPerView: 2 },
-				1024: { slidesPerView: 3 },
-				1280: { slidesPerView: 4 },
-			},
-			pagination: {
-				el: '.relatedProductsSwiper .swiper-pagination',
-				clickable: true,
-			},
-		})
-
-		// Product scenes swiper
-		productScenesSwiper = new Swiper('.productScenesSwiper', {
-			spaceBetween: 20,
-			slidesPerView: 1,
-			breakpoints: {
-				640: { slidesPerView: 2 },
-				1024: { slidesPerView: 3 },
-			},
-			pagination: {
-				el: '.productScenesSwiper .swiper-pagination',
-				clickable: true,
-			},
-		})
-	}
-
-	// Init mobile sticky bar
-	function initMobileStickyBar() {
-		const stickyBar = document.getElementById('mobile-sticky-cart')
-		const productInfo = document.querySelector('.product-info')
-
-		if (!stickyBar || !productInfo) return
-
-		const observer = new IntersectionObserver(
-			entries => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						stickyBar.classList.add('translate-y-full')
-					} else {
-						stickyBar.classList.remove('translate-y-full')
-					}
-				})
-			},
-			{ threshold: 0 },
-		)
-
-		observer.observe(productInfo)
-	}
-
-	// Load related products
-	function loadRelatedProducts(data, currentHandle) {
-		const container = document.getElementById('related-products')
-		if (!container || !data.featured_products) return
-
-		const relatedProducts = data.featured_products
-			.filter(
-				p =>
-					p.shopify_handle !== currentHandle &&
-					p.shopify_handle !== '#',
-			)
-			.slice(0, 6)
-
-		if (!relatedProducts.length) return
-
-		container.innerHTML = relatedProducts
-			.map(p => {
-				const fb = p.fallback
-				return `
-				<div class="swiper-slide">
-					<a href="${getProductUrl(p.shopify_handle)}" class="block group">
-						<div class="aspect-square rounded-2xl overflow-hidden bg-[#0a0a0a] border border-white/5 mb-4">
-							<img src="${resolveAssetImage(fb.image)}" alt="${fb.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-						</div>
-						<span class="text-[10px] uppercase tracking-widest text-white/40">${fb.category || 'Product'}</span>
-						<h3 class="font-bold text-lg mt-1 group-hover:text-purple-400 transition-colors">${fb.title}</h3>
-						<div class="mt-2 font-mono">
-							${fb.old_price ? `<span class="text-white/30 line-through mr-2">${fb.currency}${fb.old_price}</span>` : ''}
-							<span class="font-bold">${fb.currency}${fb.price}</span>
-						</div>
-					</a>
-				</div>
-			`
-			})
-			.join('')
-	}
-
-	// Load scenes featuring this product
-	function loadProductScenes(data, handle) {
-		const section = document.getElementById('product-scenes-section')
-		const container = document.getElementById('product-scenes')
-		if (!section || !container || !data.gallery_scenes) return
-
-		// Find scenes with this product in hotspots
-		const scenes = data.gallery_scenes.filter(scene =>
-			scene.hotspots?.some(h => h.shopify_handle === handle),
-		)
-
-		if (!scenes.length) return
-
-		section.classList.remove('hidden')
-		container.innerHTML = scenes
-			.map(
-				scene => `
-			<div class="swiper-slide">
-				<a href="${getShowcaseUrl()}#${scene.id}" class="block group relative aspect-video rounded-2xl overflow-hidden">
-					<img src="${scene.image}" alt="${scene.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-					<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4">
-						<span class="text-[10px] uppercase tracking-widest text-purple-400">${scene.category}</span>
-						<h3 class="font-bold text-lg">${scene.title}</h3>
-					</div>
-				</a>
-			</div>
-		`,
-			)
-			.join('')
-	}
-
-	// Update SEO meta tags
-	function updateSEOMeta(product) {
-		// Title
-		document.title = `${product.title} | CozySpot`
-
-		// Description
-		const metaDesc = document.querySelector('meta[name="description"]')
-		if (metaDesc) metaDesc.content = product.description
-
-		// Open Graph
-		const ogTitle = document.getElementById('og-title')
-		const ogDesc = document.getElementById('og-description')
-		const ogImage = document.getElementById('og-image')
-		const ogPrice = document.getElementById('og-price')
-
-		if (ogTitle) ogTitle.content = product.title
-		if (ogDesc) ogDesc.content = product.description
-		if (ogImage && product.images?.[0]) ogImage.content = product.images[0]
-		if (ogPrice) ogPrice.content = product.price
-
-		// JSON-LD
-		const jsonLd = document.getElementById('product-jsonld')
-		if (jsonLd) {
-			const schema = {
-				'@context': 'https://schema.org/',
-				'@type': 'Product',
-				name: product.title,
-				image: product.images || [],
-				description: product.description,
-				sku: product.sku || '',
-				brand: {
-					'@type': 'Brand',
-					name: product.vendor || 'CozySpot',
-				},
-				offers: {
-					'@type': 'Offer',
-					priceCurrency: product.currency === '€' ? 'EUR' : 'USD',
-					price: product.price,
-					availability: product.available
-						? 'https://schema.org/InStock'
-						: 'https://schema.org/OutOfStock',
-					itemCondition: 'https://schema.org/NewCondition',
-				},
-			}
-
-			jsonLd.textContent = JSON.stringify(schema, null, 2)
-		}
-	}
-
-	function autoInitPdp() {
-		const hasPdp =
-			document.querySelector('.productMainSwiper') ||
-			document.getElementById('product-main-images')
-		if (!hasPdp) return
-		initProductPage()
-	}
-
-	onDomReady(autoInitPdp)
-
-	// Expose functions globally
-	window.initProductPage = initProductPage
-
-	// Quantity functions
-	window.incrementQuantity = function () {
-		const input = document.getElementById('product-quantity')
-		if (input && input.value < 99) {
-			input.value = parseInt(input.value) + 1
-		}
-	}
-
-	window.decrementQuantity = function () {
-		const input = document.getElementById('product-quantity')
-		if (input && input.value > 1) {
-			input.value = parseInt(input.value) - 1
-		}
-	}
-
-	window.validateQuantity = function (input) {
-		if (input.value < 1) input.value = 1
-		if (input.value > 99) input.value = 99
-	}
-
-	// Variant selection
-	window.selectColorVariant = function (btn) {
-		// Remove active state from all
-		document.querySelectorAll('.variant-color-btn').forEach(b => {
-			b.classList.remove(
-				'border-purple-500',
-				'ring-2',
-				'ring-purple-500/30',
-			)
-			b.classList.add('border-white/20')
-		})
-
-		// Add active state to clicked
-		btn.classList.add('border-purple-500', 'ring-2', 'ring-purple-500/30')
-		btn.classList.remove('border-white/20')
-
-		// Update selected name
-		const selectedName = document.getElementById('selected-color-name')
-		if (selectedName) selectedName.textContent = btn.dataset.variantTitle
-
-		// Update price if variant has different price
-		if (btn.dataset.variantPrice && currentProduct) {
-			updateVariantPriceDisplay(btn.dataset.variantPrice)
-		}
-
-		// Change main image
-		const imageIndex = parseInt(btn.dataset.imageIndex) || 0
-		if (productMainSwiper) {
-			productMainSwiper.slideTo(imageIndex)
-		}
-
-		selectedVariant = {
-			id: btn.dataset.variantId,
-			title: btn.dataset.variantTitle,
-			price: btn.dataset.variantPrice,
-		}
-		updateAddToCartButtonVariant(selectedVariant)
-	}
-
-	window.selectSizeVariant = function (btn) {
-		// Remove active state from all
-		document.querySelectorAll('.variant-size-btn').forEach(b => {
-			b.classList.remove(
-				'border-purple-500',
-				'bg-purple-500/10',
-				'text-white',
-			)
-			b.classList.add('border-white/20', 'text-white/60')
-		})
-
-		// Add active state to clicked
-		btn.classList.add('border-purple-500', 'bg-purple-500/10', 'text-white')
-		btn.classList.remove('border-white/20', 'text-white/60')
-
-		// Update price if variant has different price
-		if (btn.dataset.variantPrice && currentProduct) {
-			updateVariantPriceDisplay(btn.dataset.variantPrice)
-		}
-
-		selectedVariant = {
-			...selectedVariant,
-			id: btn.dataset.variantId,
-			price: btn.dataset.variantPrice,
-		}
-		updateAddToCartButtonVariant(selectedVariant)
-	}
-
-	// Tab switching
-	window.switchProductTab = function (tabName) {
-		// Update buttons
-		document.querySelectorAll('.product-tab-btn').forEach(btn => {
-			if (btn.dataset.tab === tabName) {
-				btn.classList.add('active', 'text-white', 'border-purple-500')
-				btn.classList.remove('text-white/40', 'border-transparent')
-			} else {
-				btn.classList.remove(
-					'active',
-					'text-white',
-					'border-purple-500',
-				)
-				btn.classList.add('text-white/40', 'border-transparent')
-			}
-		})
-
-		// Update content
-		document.querySelectorAll('.product-tab-content').forEach(content => {
-			if (content.id === `tab-${tabName}`) {
-				content.classList.remove('hidden')
-			} else {
-				content.classList.add('hidden')
-			}
-		})
-	}
-
-	// Lightbox
-	window.openProductLightbox = function () {
-		const lightbox = document.getElementById('product-lightbox')
-		if (lightbox) {
-			lightbox.classList.remove('hidden')
-			lightbox.classList.add('flex')
-			document.body.style.overflow = 'hidden'
-
-			// Sync with main swiper position
-			if (productLightboxSwiper && productMainSwiper) {
-				productLightboxSwiper.slideTo(productMainSwiper.activeIndex)
-			}
-		}
-	}
-
-	window.closeProductLightbox = function () {
-		const lightbox = document.getElementById('product-lightbox')
-		if (lightbox) {
-			lightbox.classList.add('hidden')
-			lightbox.classList.remove('flex')
-			document.body.style.overflow = ''
-		}
-	}
-
-	// Close lightbox on escape
-	document.addEventListener('keydown', e => {
-		if (e.key === 'Escape') {
-			closeProductLightbox()
-		}
-	})
-
-	// Wishlist toggle
-	window.toggleWishlist = function () {
-		const btn = document.getElementById('wishlist-btn')
-		if (!btn) return
-
-		const svg = btn.querySelector('svg')
-		const isActive = btn.classList.toggle('active')
-
-		if (isActive) {
-			svg.setAttribute('fill', 'currentColor')
-			svg.classList.add('text-red-400')
-			svg.classList.remove('text-white/60')
-			btn.classList.add('border-red-400/50', 'bg-red-500/10')
-		} else {
-			svg.setAttribute('fill', 'none')
-			svg.classList.remove('text-red-400')
-			svg.classList.add('text-white/60')
-			btn.classList.remove('border-red-400/50', 'bg-red-500/10')
-		}
-	}
-
-	// Add to cart from PDP
-	window.handlePDPAddToCart = async function () {
-		if (!currentProduct) return
-
-		const quantity = parseInt(
-			document.getElementById('product-quantity')?.value || 1,
-		)
-		const btn = document.getElementById('add-to-cart-btn')
-		const btnText = document.getElementById('add-to-cart-text')
-
-		if (!btn || !btnText) return
-
-		// Disable button and show loading
-		btn.disabled = true
-		btnText.textContent = 'Adding...'
-		btn.classList.add('opacity-70')
-
-		await addToCart({
-			handle: currentProduct.handle,
-			variantId: selectedVariant?.id,
-			variantTitle: selectedVariant?.title,
-			title: currentProduct.title,
-			price: selectedVariant?.price || currentProduct.price,
-			image: currentProduct.images?.[0] || fallbackImage,
-			quantity: quantity,
-			sourceEl: btn,
-		})
-
-		// Success state
-		btnText.textContent = 'Added!'
-		btn.classList.remove('opacity-70')
-		btn.classList.add('text-green-500')
-
-		// Pulse badge
-		pulseBadge()
-
-		// Reset after delay
-		setTimeout(() => {
-			btn.disabled = false
-			btnText.textContent = 'Add to Cart'
-			btn.classList.remove('text-green-500')
-		}, 2000)
-	}
-})()
