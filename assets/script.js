@@ -17,6 +17,8 @@ const dataUrl = CozySpotConfig.dataUrl || 'data.json'
 const fallbackImage = CozySpotConfig.fallbackImage || ''
 const assetBase = CozySpotConfig.assetBase || ''
 const currencySymbol = CozySpotConfig.currencySymbol || '$'
+const storefrontDomain = CozySpotConfig.storefrontDomain || ''
+const storefrontToken = CozySpotConfig.storefrontToken || ''
 const getCollectionsUrl = () => CozySpotRoutes.collections || '/collections'
 const getShowcaseUrl = () => CozySpotRoutes.showcase || '#showcase'
 const getProductUrl = handle => {
@@ -73,6 +75,42 @@ const getCurrencySymbol = (code, fallback) => {
 	if (normalized === 'USD') return '$'
 	return code || fallback || currencySymbol || '$'
 }
+
+const sanitizeStoreDomain = value =>
+	(value || '').replace(/^https?:\/\//i, '').replace(/\/$/, '')
+
+const formatMoneyValue = (amount, currencyCode) => {
+	if (amount === null || amount === undefined) return ''
+	const numeric = typeof amount === 'string' ? parseFloat(amount) : amount
+	if (Number.isNaN(numeric)) return ''
+	if (currencyCode) {
+		try {
+			return new Intl.NumberFormat(undefined, {
+				style: 'currency',
+				currency: currencyCode,
+			}).format(numeric)
+		} catch (err) {
+			// fallback below
+		}
+	}
+	const symbol = getCurrencySymbol(currencyCode, currencySymbol)
+	return `${numeric.toFixed(2)}${symbol}`
+}
+
+const getStorefrontConfig = () => {
+	const domain = sanitizeStoreDomain(
+		storefrontDomain || shopifyConfig?.store_domain || '',
+	)
+	const token =
+		storefrontToken || shopifyConfig?.storefront_access_token || ''
+	if (!domain || !token) return null
+	return { domain, token }
+}
+
+const toGid = id =>
+	id && id.toString().includes('gid://')
+		? id.toString()
+		: `gid://shopify/ProductVariant/${id}`
 
 const onDomReady = handler => {
 	if (document.readyState === 'loading') {
@@ -1014,8 +1052,7 @@ function renderHotspots(room, container) {
 
 		// If there is a shopify_handle, show a loading indicator
 		if (hs.shopify_handle && !hs.product_name) {
-			dot.classList.add('loading')
-			dot.title = 'Loading...'
+			dot.title = 'Click on me'
 		} else {
 			const hsName = hs.product_name || hs.name || hs.title || ''
 			dot.title = hsName
@@ -1842,6 +1879,7 @@ onDomReady(() => {
 	loadData()
 	runReveal() // expose common globals used by inline attributes
 	if (document.getElementById('cart-drawer')) CartDrawer.init()
+	applyAutomaticDiscounts()
 	window.openRoomViewer = openRoomViewer
 	window.closeViewer = closeViewer
 	window.nextViewerRoom = nextViewerRoom
@@ -2394,6 +2432,111 @@ async function fetchProductJsonByHandle(handle) {
 		}
 	}
 	return null
+}
+
+async function applyAutomaticDiscounts() {
+	const config = getStorefrontConfig()
+	if (!config) return
+	const priceWraps = Array.from(
+		document.querySelectorAll('[data-price-variant-id]'),
+	)
+	if (!priceWraps.length) return
+
+	const variantIds = Array.from(
+		new Set(
+			priceWraps.map(el => el.dataset.priceVariantId).filter(Boolean),
+		),
+	).slice(0, 50)
+
+	if (!variantIds.length) return
+
+	const lines = variantIds.map(id => ({
+		quantity: 1,
+		merchandiseId: toGid(id),
+	}))
+
+	const query = `mutation cartCreate($lines: [CartLineInput!]) {
+		cartCreate(input: { lines: $lines }) {
+			cart {
+				lines(first: 50) {
+					edges {
+						node {
+							merchandise {
+								... on ProductVariant {
+									id
+								}
+							}
+							cost {
+								amountPerQuantity { amount currencyCode }
+								compareAtAmountPerQuantity { amount currencyCode }
+							}
+						}
+					}
+				}
+			}
+		}
+	}`
+
+	try {
+		const response = await fetch(
+			`https://${config.domain}/api/2024-01/graphql.json`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Shopify-Storefront-Access-Token': config.token,
+				},
+				body: JSON.stringify({ query, variables: { lines } }),
+			},
+		)
+		if (!response.ok) return
+		const data = await response.json()
+		const edges = data?.data?.cartCreate?.cart?.lines?.edges || []
+		const lineMap = new Map()
+		edges.forEach(edge => {
+			const node = edge?.node
+			const gid = node?.merchandise?.id || ''
+			const id = gid.split('/').pop()
+			if (id) lineMap.set(id, node?.cost || null)
+		})
+
+		priceWraps.forEach(wrap => {
+			const id = wrap.dataset.priceVariantId
+			const cost = id ? lineMap.get(id) : null
+			if (!cost) return
+			const current = parseFloat(cost?.amountPerQuantity?.amount || '')
+			const compare = parseFloat(
+				cost?.compareAtAmountPerQuantity?.amount || '',
+			)
+			const currency = cost?.amountPerQuantity?.currencyCode || ''
+
+			const currentEl = wrap.querySelector('[data-price-current]')
+			const compareEl = wrap.querySelector('[data-price-compare]')
+			const discountEl = wrap.querySelector('[data-price-discount]')
+			if (currentEl && !Number.isNaN(current)) {
+				currentEl.textContent = formatMoneyValue(current, currency)
+			}
+			const hasDiscount =
+				!Number.isNaN(compare) && compare > 0 && compare > current
+			if (compareEl) {
+				compareEl.textContent = hasDiscount
+					? formatMoneyValue(compare, currency)
+					: ''
+				compareEl.classList.toggle('hidden', !hasDiscount)
+			}
+			if (discountEl) {
+				if (hasDiscount) {
+					const percent = Math.round(
+						((compare - current) / compare) * 100,
+					)
+					discountEl.textContent = `-${percent}%`
+				}
+				discountEl.classList.toggle('hidden', !hasDiscount)
+			}
+		})
+	} catch (err) {
+		console.warn('[Discounts] Failed to apply automatic discounts:', err)
+	}
 }
 
 async function addToCartShopify(variantId, quantity) {

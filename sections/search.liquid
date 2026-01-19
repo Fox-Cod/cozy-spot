@@ -35,10 +35,21 @@
             {% endif %}
             <div class="search-result__content">
               <p>
-                {{ result.title | link_to: result.url }}
-                {% if result.price %}
-                  {{ result.price | money_with_currency }}
+              {{ result.title | link_to: result.url }}
+              {% if result.object_type == 'product' %}
+                <span data-price-wrap data-price-variant-id="{{ result.selected_or_first_available_variant.id }}">
+                <span data-price-current>{{ result.price | money_with_currency }}</span>
+                {% if result.compare_at_price > result.price %}
+                  <span class="text-sm text-white/40 line-through" data-price-compare>{{ result.compare_at_price | money_with_currency }}</span>
+                  {% assign discount_amount = result.compare_at_price | minus: result.price %}
+                  {% assign discount_percent = discount_amount | times: 100.0 | divided_by: result.compare_at_price | round %}
+                  <span class="text-xs text-red-400 font-bold" data-price-discount>-{{ discount_percent }}%</span>
+                {% else %}
+                  <span class="text-sm text-white/40 line-through hidden" data-price-compare></span>
+                  <span class="text-xs text-red-400 font-bold hidden" data-price-discount></span>
                 {% endif %}
+                </span>
+              {% endif %}
               </p>
             </div>
           </div>

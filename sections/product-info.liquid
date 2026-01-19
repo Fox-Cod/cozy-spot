@@ -85,14 +85,17 @@
 
 
 				<!-- Price -->
-				<div class="flex items-end gap-4 mb-4">
-					<div id="product-price" class="text-4xl font-mono font-black text-white">{{ product.price | money }}</div>
+				<div class="flex items-end gap-4 mb-4" data-price-wrap data-price-variant-id="{{ product.selected_or_first_available_variant.id }}">
+					<div id="product-price" class="text-4xl font-mono font-black text-white" data-price-current>{{ product.price | money }}</div>
 					{% if product.compare_at_price > product.price %}
-						<div id="product-old-price" class="text-xl font-mono text-white/30 line-through">{{ product.compare_at_price | money }}</div>
+						<div id="product-old-price" class="text-xl font-mono text-white/30 line-through" data-price-compare>{{ product.compare_at_price | money }}</div>
+						{% assign discount_amount = product.compare_at_price | minus: product.price %}
+						{% assign discount_percent = discount_amount | times: 100.0 | divided_by: product.compare_at_price | round %}
+						<div id="product-discount" class="bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase" data-price-discount>-{{ discount_percent }}%</div>
 					{% else %}
-						<div id="product-old-price" class="text-xl font-mono text-white/30 line-through hidden">$0</div>
+						<div id="product-old-price" class="text-xl font-mono text-white/30 line-through hidden" data-price-compare>$0</div>
+						<div id="product-discount" class="bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase hidden" data-price-discount>-0%</div>
 					{% endif %}
-					<div id="product-discount" class="bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase hidden">-0%</div>
 				</div>
 
 				<!-- Variants: Color -->

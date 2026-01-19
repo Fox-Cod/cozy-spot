@@ -26,7 +26,18 @@
           <div class="collection-product__reviews">
             {% render 'jdgm-rating', product: product %}
           </div>
-          <p>{{ product.price | money }}</p>
+          <p data-price-wrap data-price-variant-id="{{ product.selected_or_first_available_variant.id }}">
+          <span data-price-current>{{ product.price | money }}</span>
+          {% if product.compare_at_price > product.price %}
+            <span class="text-sm text-white/40 line-through" data-price-compare>{{ product.compare_at_price | money }}</span>
+            {% assign discount_amount = product.compare_at_price | minus: product.price %}
+            {% assign discount_percent = discount_amount | times: 100.0 | divided_by: product.compare_at_price | round %}
+            <span class="text-xs text-red-400 font-bold" data-price-discount>-{{ discount_percent }}%</span>
+          {% else %}
+            <span class="text-sm text-white/40 line-through hidden" data-price-compare></span>
+            <span class="text-xs text-red-400 font-bold hidden" data-price-discount></span>
+          {% endif %}
+          </p>
         </div>
       </div>
     {% endfor %}
