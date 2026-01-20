@@ -336,98 +336,96 @@
 
 			<!-- Reviews Tab -->
 			<div id="tab-reviews" class="product-tab-content hidden w-full">
-    <div class="max-w-4xl mx-auto mt-8 md:mt-12">
-        
-        <div class="relative bg-[#050505] border border-white/10 rounded-3xl p-6 md:p-10 shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden">
-            
-            <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-600 to-transparent opacity-70"></div>
-            <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-purple-600/10 rounded-full blur-[80px]"></div>
+				<div class="max-w-4xl mx-auto mt-8 md:mt-12">
+					<div class="relative bg-white/5 border border-white/10 rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl overflow-hidden">
+						<div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-60"></div>
+						<div class="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px]"></div>
 
-			<style>
-				/* 1. Force all widget text (including paragraphs, spans, links) */
-                #judgeme_product_reviews,
-                #judgeme_product_reviews * {
-                    color: #ffffff !important;
-                }
+						<style>
+							#judgeme_product_reviews,
+							#judgeme_product_reviews * {
+								color: rgba(255, 255, 255, 0.9) !important;
+							}
 
-				/* 2. Explicitly color titles and authors */
-                .jdgm-rev__title,
-                .jdgm-rev__body,
-                .jdgm-rev__author,
-                .jdgm-rev__timestamp,
-                .jdgm-rev__icon {
-                    color: #ffffff !important;
-                }
+							#judgeme_product_reviews {
+								font-family: inherit !important;
+							}
 
-				/* 3. Restore star colors (otherwise they turn white from the rule above) */
-                .jdgm-star.jdgm--on:before {
-                    color: #a855f7 !important; /* purple-500 */
-                }
-                .jdgm-star.jdgm--off:before {
-                    color: #333333 !important;
-                }
+							.jdgm-rev__title,
+							.jdgm-rev__body,
+							.jdgm-rev__author,
+							.jdgm-rev__timestamp,
+							.jdgm-rev__icon {
+								color: rgba(255, 255, 255, 0.9) !important;
+							}
 
-				/* 4. Style form fields (dark background, white text) */
-                .jdgm-form-wrapper input[type="text"], 
-                .jdgm-form-wrapper input[type="email"], 
-                .jdgm-form-wrapper textarea {
-                    background-color: #1a1a1a !important;
-                    border: 1px solid #333 !important;
-                    color: #ffffff !important;
-                }
+							.jdgm-star.jdgm--on:before {
+								color: #a855f7 !important;
+							}
+							.jdgm-star.jdgm--off:before {
+								color: rgba(255, 255, 255, 0.2) !important;
+							}
 
-				/* 5. "Write a review" button (black text on white background) */
-                a.jdgm-write-rev-link {
-                    background-color: #ffffff !important;
-                    color: #000000 !important;
-                    border: none !important;
-                    border-radius: 8px !important;
-                    font-weight: 900 !important;
-                    text-transform: uppercase !important;
-                    text-decoration: none !important;
-                    padding: 10px 20px !important;
-                }
-				/* Button hover */
-                a.jdgm-write-rev-link:hover {
-                    background-color: #9333ea !important; /* purple-600 */
-                    color: #ffffff !important;
-                }
-                
-				/* Remove extra gray borders */
-                .jdgm-rev { border-top: 1px solid rgba(255,255,255,0.1) !important; }
-                .jdgm-row-stars { border: none !important; }
-            </style>
+							.jdgm-form-wrapper input[type="text"],
+							.jdgm-form-wrapper input[type="email"],
+							.jdgm-form-wrapper textarea {
+								background-color: rgba(255, 255, 255, 0.04) !important;
+								border: 1px solid rgba(255, 255, 255, 0.15) !important;
+								color: #ffffff !important;
+								border-radius: 12px !important;
+							}
 
-            {% assign has_legacy = false %}
-            {% if product.metafields.judgeme.widget.size > 20 %}
-                {% assign has_legacy = true %}
-            {% endif %}
-            <div style='clear:both'></div>
-            <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget' 
-                data-product-title='{{ product.title | escape }}' 
-                data-id='{{ product.id }}' 
-                data-product-id='{{ product.id }}' 
-                data-widget='review' 
-                data-auto-install='false' 
-                data-shop-reviews-count='{{ shop.metafields.judgeme.shop_reviews_count | default: 0 | escape }}' 
-                data-entry-point='review_widget.js' 
-                data-entry-key='review-widget/main.js'>
-                {% if has_legacy %}
-                    <div class='jdgm-legacy-widget-content' style='display: none;'>
-                        {{ product.metafields.judgeme.widget }}
-                    </div>
-                {% endif %}
-            </div>
-            {% if product.metafields.judgeme.review_widget_data %}
-                <script>
-                    jdgm.data ||= {}; 
-                    jdgm.data.reviewWidget ||= {}; 
-                    jdgm.data.reviewWidget[{{ product.id }}] = {{ product.metafields.judgeme.review_widget_data }}
-                </script>
-            {% endif %}
-            </div>
-    </div>
-</div>
+							a.jdgm-write-rev-link {
+								background: linear-gradient(135deg, #ffffff, #e9d5ff) !important;
+								color: #0b0b0b !important;
+								border: 1px solid rgba(255, 255, 255, 0.2) !important;
+								border-radius: 999px !important;
+								font-weight: 900 !important;
+								text-transform: uppercase !important;
+								text-decoration: none !important;
+								padding: 10px 22px !important;
+								letter-spacing: 0.2em !important;
+								font-size: 10px !important;
+							}
+							a.jdgm-write-rev-link:hover {
+								background: #9333ea !important;
+								color: #ffffff !important;
+							}
+
+							.jdgm-rev { border-top: 1px solid rgba(255, 255, 255, 0.08) !important; }
+							.jdgm-row-stars { border: none !important; }
+						</style>
+
+						{% assign has_legacy = false %}
+						{% if product.metafields.judgeme.widget.size > 20 %}
+							{% assign has_legacy = true %}
+						{% endif %}
+						<div style='clear:both'></div>
+						<div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget' 
+							data-product-title='{{ product.title | escape }}' 
+							data-id='{{ product.id }}' 
+							data-product-id='{{ product.id }}' 
+							data-widget='review' 
+							data-auto-install='false' 
+							data-shop-reviews-count='{{ shop.metafields.judgeme.shop_reviews_count | default: 0 | escape }}' 
+							data-entry-point='review_widget.js' 
+							data-entry-key='review-widget/main.js'>
+							{% if has_legacy %}
+								<div class='jdgm-legacy-widget-content' style='display: none;'>
+									{{ product.metafields.judgeme.widget }}
+								</div>
+							{% endif %}
+						</div>
+						{% if product.metafields.judgeme.review_widget_data %}
+							<script>
+								jdgm.data ||= {};
+								jdgm.data.reviewWidget ||= {};
+								jdgm.data.reviewWidget[{{ product.id }}] = {{ product.metafields.judgeme.review_widget_data }}
+							</script>
+						{% endif %}
+					</div>
+				</div>
+			</div>
 		</div>
 	</section>
 

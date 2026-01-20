@@ -79,22 +79,5 @@
 				"default": 4
 			}
 		]
-	},
-	{
-		"name": "Storefront API",
-		"settings": [
-			{
-				"type": "text",
-				"id": "storefront_domain",
-				"label": "Storefront domain (myshopify.com)",
-				"default": ""
-			},
-			{
-				"type": "text",
-				"id": "storefront_access_token",
-				"label": "Storefront access token",
-				"default": ""
-			}
-		]
 	}
 ]

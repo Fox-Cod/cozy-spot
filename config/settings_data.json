@@ -9,10 +9,7 @@
  */
 {
 	"current": {
-		"settings": {
-			"storefront_domain": "",
-			"storefront_access_token": ""
-		},
+		"settings": {},
 		"sections": {
 			"cart": {
 				"type": "cart",
