@@ -174,80 +174,103 @@
 					</button>
 				</div>
 
-				<!-- USP Features -->
-				<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 py-6 border-t border-b border-white/10">
-					<div class="flex items-center gap-3">
-						<div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-							<svg
-								class="w-5 h-5 text-green-400"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<rect x="1" y="3" width="15" height="13"></rect>
-								<polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-								<circle cx="5.5" cy="18.5" r="2.5"></circle>
-								<circle cx="18.5" cy="18.5" r="2.5"></circle>
-							</svg>
-						</div>
-						<div>
-							<div class="text-[10px] uppercase tracking-widest text-white/40">Shipping</div>
-							<div class="text-xs font-bold">Free</div>
+				<!-- Shipping Timeline -->
+				<div class="py-6 border-t border-b border-white/10">
+					<div class="flex items-center justify-between gap-3 text-[10px] uppercase tracking-widest text-white/40 mb-4">
+						<span>Shipping Timeline</span>
+						<span class="text-white/20"><span id="product-vendor">{{ product.vendor }}</span></span>
+					</div>
+					<div class="shipping-timeline">
+						<div class="shipping-timeline__inner">
+							<div class="shipping-timeline__steps">
+								<label for="ship-step-1" data-step="1">
+									<span class="shipping-timeline__icon">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<circle cx="12" cy="12" r="9"></circle>
+											<path d="M12 7v5l3 3"></path>
+										</svg>
+									</span>
+									Processing
+								</label>
+								<label for="ship-step-2" data-step="2">
+									<span class="shipping-timeline__icon">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<path d="M9 12l2 2 4-4"></path>
+											<circle cx="12" cy="12" r="9"></circle>
+										</svg>
+									</span>
+									Quality control
+								</label>
+								<label for="ship-step-3" data-step="3">
+									<span class="shipping-timeline__icon">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<path d="M21 16V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8"></path>
+											<path d="M3 10h18"></path>
+											<path d="M7 16h10"></path>
+										</svg>
+									</span>
+									Packaging
+								</label>
+								<label for="ship-step-4" data-step="4">
+									<span class="shipping-timeline__icon">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<rect x="1" y="3" width="15" height="10"></rect>
+											<path d="M16 8h4l3 3v4h-7V8z"></path>
+											<circle cx="5.5" cy="18.5" r="2.5"></circle>
+											<circle cx="18.5" cy="18.5" r="2.5"></circle>
+										</svg>
+									</span>
+									Shipping
+								</label>
+							</div>
+							<input type="radio" name="ship-step" id="ship-step-1" checked>
+							<input type="radio" name="ship-step" id="ship-step-2">
+							<input type="radio" name="ship-step" id="ship-step-3">
+							<input type="radio" name="ship-step" id="ship-step-4">
+							<div class="shipping-timeline__bar">
+								<div class="shipping-timeline__bar-set"></div>
+							</div>
+							<div class="shipping-timeline__tabs">
+							    <div class="shipping-timeline__tab tab-1">
+							        <h4>Order Processing</h4>
+							        <p>Your order is confirmed and items are being reserved at our warehouse.</p>
+							    </div>
+							    <div class="shipping-timeline__tab tab-2">
+							        <h4>Quality Control</h4>
+							        <p>Every item undergoes a thorough inspection to ensure it meets our standards.</p>
+							    </div>
+							    <div class="shipping-timeline__tab tab-3">
+							        <h4>Secure Packaging</h4>
+							        <p>We carefully pack your items using protective materials for a safe journey.</p>
+							    </div>
+							    <div class="shipping-timeline__tab tab-4">
+							        <h4>Dispatched</h4>
+							        <p>Your package is with the carrier. Tracking details will be updated shortly.</p>
+							    </div>
+							</div>
 						</div>
 					</div>
-					<div class="flex items-center gap-3">
-						<div class="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
-							<svg
-								class="w-5 h-5 text-yellow-400"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<circle cx="12" cy="12" r="10"></circle>
-								<polyline points="12 6 12 12 16 14"></polyline>
-							</svg>
-						</div>
-						<div>
-							<div class="text-[10px] uppercase tracking-widest text-white/40">Delivery</div>
-							<div class="text-xs font-bold">3-12 Days</div>
-						</div>
-					</div>
-					<div class="flex items-center gap-3">
-						<div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-							<svg
-								class="w-5 h-5 text-blue-400"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<polyline points="23 4 23 10 17 10"></polyline>
-								<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-							</svg>
-						</div>
-						<div>
-							<div class="text-[10px] uppercase tracking-widest text-white/40">Returns</div>
-							<div class="text-xs font-bold">14 Days</div>
-						</div>
-					</div>
+					<script>
+						(() => {
+							const radios = Array.from(document.querySelectorAll('input[name="ship-step"]'));
+							const labels = Array.from(document.querySelectorAll('.shipping-timeline__steps label'));
+							if (!radios.length || !labels.length) return;
+							labels.forEach((label, i) => {
+								label.addEventListener('click', () => {
+									idx = i;
+								});
+							});
+							setInterval(() => {
+								idx = (idx + 1) % radios.length;
+								radios[idx].checked = true;
+							}, 7000);
+						})();
+					</script>
 				</div>
 
 				<!-- SKU & Meta -->
 				<div class="mt-6 flex flex-wrap gap-4 text-[10px] uppercase tracking-widest text-white/30">
 					<span>SKU: <span id="product-sku">{{ product.selected_or_first_available_variant.sku }}</span></span>
-					<span>•</span>
-					<span>Vendor: <span id="product-vendor">{{ product.vendor }}</span></span>
 					<span>•</span>
 					<span><a href="{{ shipping-policy.url }}">Shipping Policy</a></span>
 				</div>

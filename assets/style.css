@@ -1,3 +1,208 @@
+/* Shipping Timeline */
+.shipping-timeline {
+	color: rgba(255, 255, 255, 0.9);
+}
+.shipping-timeline__inner {
+	position: relative;
+	padding: 10px 0 6px;
+}
+.shipping-timeline__steps {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+	text-transform: uppercase;
+	letter-spacing: 0.3em;
+	font-size: 10px;
+	color: rgba(255, 255, 255, 0.5);
+}
+.shipping-timeline__steps label {
+	position: relative;
+	padding-top: 44px;
+	text-align: center;
+	cursor: pointer;
+}
+.shipping-timeline__icon {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 40px;
+	height: 40px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	background: linear-gradient(
+		145deg,
+		rgba(255, 255, 255, 0.08),
+		rgba(255, 255, 255, 0.02)
+	);
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transition:
+		transform 0.25s ease,
+		border-color 0.25s ease,
+		background 0.25s ease,
+		color 0.25s ease,
+		box-shadow 0.25s ease;
+}
+.shipping-timeline__icon svg {
+	width: 24px;
+	height: 24px;
+	stroke: currentColor;
+}
+.shipping-timeline__steps label:hover .shipping-timeline__icon,
+.shipping-timeline__steps label:active .shipping-timeline__icon {
+	transform: translateX(-50%) scale(1.1);
+	border-color: rgba(255, 255, 255, 0.35);
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45);
+}
+.shipping-timeline__steps label[data-step='1'] .shipping-timeline__icon {
+	color: #a855f7;
+}
+.shipping-timeline__steps label[data-step='2'] .shipping-timeline__icon {
+	color: #22c55e;
+}
+.shipping-timeline__steps label[data-step='3'] .shipping-timeline__icon {
+	color: #facc15;
+}
+.shipping-timeline__steps label[data-step='4'] .shipping-timeline__icon {
+	color: #3b82f6;
+}
+.shipping-timeline__bar {
+	height: 6px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.08);
+	margin-top: 10px;
+	overflow: hidden;
+}
+.shipping-timeline__bar-set {
+	height: 100%;
+	width: 0;
+	min-width: 8%;
+	background: linear-gradient(90deg, #a855f7, #22d3ee);
+	transition: width 0.6s ease;
+}
+.shipping-timeline__tabs {
+	position: relative;
+	min-height: 70px;
+	margin-top: 14px;
+}
+.shipping-timeline__tab {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	transform: translateY(6px);
+	transition: all 0.25s ease;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 14px;
+	padding: 12px 14px;
+}
+.shipping-timeline__tab h4 {
+	margin: 0 0 6px;
+	font-size: 12px;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	color: rgba(255, 255, 255, 0.9);
+}
+.shipping-timeline__tab p {
+	margin: 0;
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.6);
+}
+.shipping-timeline input[type='radio'] {
+	display: none;
+}
+#ship-step-1:checked ~ .shipping-timeline__bar .shipping-timeline__bar-set {
+	width: 0%;
+}
+#ship-step-2:checked ~ .shipping-timeline__bar .shipping-timeline__bar-set {
+	width: 33.333%;
+}
+#ship-step-3:checked ~ .shipping-timeline__bar .shipping-timeline__bar-set {
+	width: 66.666%;
+}
+#ship-step-4:checked ~ .shipping-timeline__bar .shipping-timeline__bar-set {
+	width: 100%;
+}
+#ship-step-1:checked ~ .shipping-timeline__tabs .tab-1,
+#ship-step-2:checked ~ .shipping-timeline__tabs .tab-2,
+#ship-step-3:checked ~ .shipping-timeline__tabs .tab-3,
+#ship-step-4:checked ~ .shipping-timeline__tabs .tab-4 {
+	opacity: 1;
+	transform: translateY(0);
+}
+#ship-step-1:checked ~ .shipping-timeline__steps label:nth-child(1),
+#ship-step-2:checked ~ .shipping-timeline__steps label:nth-child(2),
+#ship-step-3:checked ~ .shipping-timeline__steps label:nth-child(3),
+#ship-step-4:checked ~ .shipping-timeline__steps label:nth-child(4) {
+	color: rgba(255, 255, 255, 0.95);
+}
+#ship-step-1:checked
+	~ .shipping-timeline__steps
+	label:nth-child(1)
+	.shipping-timeline__icon,
+#ship-step-2:checked
+	~ .shipping-timeline__steps
+	label:nth-child(2)
+	.shipping-timeline__icon,
+#ship-step-3:checked
+	~ .shipping-timeline__steps
+	label:nth-child(3)
+	.shipping-timeline__icon,
+#ship-step-4:checked
+	~ .shipping-timeline__steps
+	label:nth-child(4)
+	.shipping-timeline__icon {
+	background: currentColor;
+	border-color: currentColor;
+	color: #0b0b0b;
+	transform: translateX(-50%) scale(1.16);
+	box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5);
+}
+@media (max-width: 768px) {
+	.shipping-timeline__inner {
+		overflow-x: hidden;
+	}
+	.shipping-timeline__steps {
+		min-width: 0;
+		letter-spacing: 0.18em;
+		font-size: 8px;
+		gap: 6px;
+	}
+	.shipping-timeline__steps label {
+		padding-top: 38px;
+		line-height: 1.2;
+		white-space: normal;
+	}
+	.shipping-timeline__icon {
+		width: 34px;
+		height: 34px;
+	}
+	.shipping-timeline__icon svg {
+		width: 20px;
+		height: 20px;
+	}
+	.shipping-timeline__bar {
+		height: 5px;
+		margin-top: 8px;
+	}
+	.shipping-timeline__tabs {
+		min-height: 98px;
+	}
+	.shipping-timeline__tab {
+		padding: 10px 12px;
+	}
+	.shipping-timeline__tab h4 {
+		font-size: 11px;
+		letter-spacing: 0.16em;
+	}
+	.shipping-timeline__tab p {
+		font-size: 11px;
+	}
+}
 /* style.css - extracted from index.html and organized
    Sections: Base, Animations, Swiper, Components, Viewer, Responsive
 */
