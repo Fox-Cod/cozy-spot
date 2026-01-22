@@ -151,7 +151,7 @@
 				{
 					"top": "28%",
 					"left": "41%",
-					"shopify_handle": "triangle-modular-lights",
+					"shopify_handle": "triangle-led-quantum-light-game-room",
 					"fallback": {
 						"product_name": "FallBack",
 						"description": "N/A.",
@@ -167,7 +167,7 @@
 				{
 					"top": "31%",
 					"left": "24%",
-					"shopify_handle": "cloud-shaped-neon-sign",
+					"shopify_handle": "cloud-neon-led-wall-night-light",
 					"fallback": {
 						"product_name": "FallBack",
 						"description": "N/A.",
@@ -181,93 +181,246 @@
 					}
 				}
 			]
-		},
-		{
-			"id": "scene-3",
-			"category": "Nature",
-			"title": "Nature Setup #03",
-			"image": "bio-3.jpg",
-			"hotspots": [
-				{
-					"top": "15%",
-					"left": "45%",
-					"shopify_handle": "triangle-modular-lights",
-					"fallback": {
-						"product_name": "FallBack",
-						"description": "N/A.",
-						"price": "N/A",
-						"currency": "",
-						"img": "cozy-bl.png",
-						"rating": "N/A",
-						"reviews_count": "N/A",
-						"category": "N/A",
-						"link": "#"
-					}
-				}
-			]
-		},
-		{
-			"id": "scene-4",
-			"category": "Nature",
-			"title": "Nature Setup #04",
-			"image": "bio-4.jpg",
-			"hotspots": []
 		},
 		{
 			"id": "scene-5",
 			"category": "Cozy",
 			"title": "Cozy Setup #01",
 			"image": "cozy-01.jpg",
-			"hotspots": []
+			"hotspots": [
+				{
+					"top": "48%",
+					"left": "9%",
+					"shopify_handle": "rgb-led-hexagonal-quantum-lamp",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "10%",
+					"left": "24%",
+					"shopify_handle": "led-neon-light-band",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "57%",
+					"left": "7%",
+					"shopify_handle": "headphone-stand-for-desk-wooden-headset-stand-for-desk-wooden-headphone-holder-with-airpods-max-and-moresquare",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "33%",
+					"left": "34%",
+					"shopify_handle": "pegboard-shelf",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				}
+			]
 		},
 		{
 			"id": "scene-6",
 			"category": "Cozy",
 			"title": "Cozy Setup #02",
 			"image": "cozy-02.jpg",
-			"hotspots": []
-		},
-		{
-			"id": "scene-7",
-			"category": "Cozy",
-			"title": "Cozy Setup #03",
-			"image": "cozy-03.jpg",
-			"hotspots": []
-		},
-		{
-			"id": "scene-8",
-			"category": "Cozy",
-			"title": "Cozy Setup #04",
-			"image": "cozy-04.jpg",
-			"hotspots": []
-		},
-		{
-			"id": "scene-9",
-			"category": "Cyberpunk",
-			"title": "Cyberpunk Setup #01",
-			"image": "cyber-01.jpg",
-			"hotspots": []
+			"hotspots": [
+				{
+					"top": "33%",
+					"left": "6%",
+					"shopify_handle": "pegboard-shelf",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "40%",
+					"left": "28%",
+					"shopify_handle": "cloud-neon-led-wall-night-light",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "63%",
+					"left": "31%",
+					"shopify_handle": "wireless-bluetooth-speaker",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				}
+			]
 		},
 		{
 			"id": "scene-10",
 			"category": "Cyberpunk",
 			"title": "Cyberpunk Setup #02",
 			"image": "cyber-02.jpg",
-			"hotspots": []
+			"hotspots": [
+				{
+					"top": "66%",
+					"left": "28%",
+					"shopify_handle": "wireless-bluetooth-speaker",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "26%",
+					"left": "33%",
+					"shopify_handle": "rgb-led-hexagonal-quantum-lamp",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "12%",
+					"left": "33%",
+					"shopify_handle": "pegboard-shelf",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				}
+			]
 		},
 		{
 			"id": "scene-11",
 			"category": "Cyberpunk",
 			"title": "Cyberpunk Setup #03",
 			"image": "cyber-03.jpg",
-			"hotspots": []
-		},
-		{
-			"id": "scene-12",
-			"category": "Cyberpunk",
-			"title": "Cyberpunk Setup #04",
-			"image": "cyber-04.jpg",
-			"hotspots": []
+			"hotspots": [
+				{
+					"top": "13%",
+					"left": "33%",
+					"shopify_handle": "rgb-led-hexagonal-quantum-lamp",
+					"fallback": {
+						"product_name": "FallBack",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "17%",
+					"left": "70%",
+					"shopify_handle": "wireless-bluetooth-speaker",
+					"fallback": {
+						"product_name": "Coming Soon",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				},
+				{
+					"top": "32%",
+					"left": "62%",
+					"shopify_handle": "wireless-bluetooth-speaker",
+					"fallback": {
+						"product_name": "Coming Soon",
+						"description": "N/A.",
+						"price": "N/A",
+						"currency": "",
+						"img": "cozy-bl.png",
+						"rating": "N/A",
+						"reviews_count": "N/A",
+						"category": "N/A",
+						"link": "#"
+					}
+				}
+			]
 		},
 		{
 			"id": "scene-13",

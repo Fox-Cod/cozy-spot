@@ -33,7 +33,7 @@
 		<div id="global-viewer" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md hidden flex-col">
 			<button
 				onclick="closeViewer()"
-				class="absolute top-8 right-8 z-[110] bg-white/10 hover:bg-white/20 text-white w-10 h-10 flex items-center justify-center rounded-full transition-all border border-white/5 text-xl"
+				class="viewer-close absolute top-8 right-8 z-[110] bg-white/10 hover:bg-white/20 text-white w-10 h-10 flex items-center justify-center rounded-full transition-all border border-white/5 text-xl"
 			>
 				✕
 			</button>
@@ -41,7 +41,7 @@
 			<button id="viewer-prev" onclick="prevViewerRoom()" aria-label="Previous image" class="viewer-nav left hidden md:flex">‹</button>
 			<button id="viewer-next" onclick="nextViewerRoom()" aria-label="Next image" class="viewer-nav right hidden md:flex">›</button>
 
-			<div id="viewer-controls" class="absolute top-8 left-8 z-[115] hidden md:flex gap-3 items-center">
+			<div id="viewer-controls" class="absolute top-8 left-8 z-[115] flex gap-3 items-center">
 				<button onclick="zoomOut()" class="bg-white/10 hover:bg-white/20 text-white w-10 h-10 flex items-center justify-center rounded-full transition-all" title="Zoom Out">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -113,10 +113,10 @@
 			</div>
 		</div>
 
-		<div id="sheet-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-[1000]" onclick="closeSheet()"></div>
+		<div id="sheet-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-[1400]" onclick="closeSheet()"></div>
 		<div
 			id="bottom-sheet"
-			class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] bg-[#111] border-t border-white/10 rounded-t-[2rem] z-[1001] translate-y-full transition-transform duration-300 pb-10"
+			class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] bg-[#111] border-t border-white/10 rounded-t-[2rem] z-[1401] translate-y-full transition-transform duration-300 pb-10"
 		>
 			<div id="sheet-grabber" class="w-full py-4 flex justify-center cursor-grab"><div class="w-12 h-1 bg-white/20 rounded-full"></div></div>
 			<div id="sheet-content" class="px-6"></div>

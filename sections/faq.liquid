@@ -1,0 +1,153 @@
+{% comment %}
+  FAQ section for a dedicated FAQ page.
+{% endcomment %}
+
+<section class="faq-page">
+  <div class="faq-page__container">
+    <header class="faq-page__header">
+      <h1 class="faq-page__title">{{ section.settings.heading }}</h1>
+      {% if section.settings.subheading != blank %}
+        <p class="faq-page__subtitle">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </header>
+
+    <div class="faq-page__items">
+      {% for block in section.blocks %}
+        {% if block.type == 'faq_item' %}
+          <details class="faq-item" {% if block.settings.open %}open{% endif %}>
+            <summary class="faq-item__question">
+              {{ block.settings.question }}
+            </summary>
+            <div class="faq-item__answer rte">
+              {{ block.settings.answer }}
+            </div>
+          </details>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .faq-page {
+    padding: clamp(32px, 6vw, 72px) 0;
+  }
+  .faq-page__container {
+    display: grid;
+    grid-template-columns: var(--content-grid);
+  }
+  .faq-page__container > * {
+    grid-column: 2;
+  }
+  .faq-page__header {
+    text-align: center;
+    margin-bottom: clamp(24px, 4vw, 40px);
+  }
+  .faq-page__title {
+    font-size: clamp(28px, 4vw, 44px);
+    margin: 0 0 12px;
+  }
+  .faq-page__subtitle {
+    max-width: 720px;
+    margin: 0 auto;
+    color: rgba(var(--color-text), 0.75);
+  }
+  .faq-page__items {
+    display: grid;
+    gap: 16px;
+  }
+  .faq-item {
+    background: rgba(var(--color-foreground), 0.03);
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid rgba(var(--color-foreground), 0.08);
+  }
+  .faq-item[open] {
+    background: rgba(var(--color-foreground), 0.06);
+  }
+  .faq-item__question {
+    cursor: pointer;
+    padding: 18px 22px;
+    font-weight: 600;
+    list-style: none;
+  }
+  .faq-item__question::-webkit-details-marker {
+    display: none;
+  }
+  .faq-item__question::after {
+    content: '+';
+    float: right;
+    font-size: 20px;
+    line-height: 1;
+    transition: transform 0.2s ease;
+  }
+  .faq-item[open] .faq-item__question::after {
+    content: '–';
+  }
+  .faq-item__answer {
+    padding: 0 22px 20px;
+    color: rgba(var(--color-text), 0.8);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "FAQ",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "F.A.Q"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Answers to the most common questions."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq_item",
+      "name": "FAQ item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "Question goes here"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>Answer goes here.</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "open",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ",
+      "blocks": [
+        {
+          "type": "faq_item"
+        },
+        {
+          "type": "faq_item"
+        },
+        {
+          "type": "faq_item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

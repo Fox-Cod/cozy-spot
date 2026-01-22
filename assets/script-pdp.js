@@ -217,6 +217,7 @@
 							sku: e.node.sku,
 							available: e.node.availableForSale,
 							price: e.node.price?.amount,
+							compare_at_price: e.node.compareAtPrice?.amount,
 							image: e.node.image?.url,
 							options: e.node.selectedOptions,
 						})) || [],
@@ -364,13 +365,42 @@
 		if (stickyTitle) stickyTitle.textContent = product.title
 	}
 
-	function updateVariantPriceDisplay(price) {
+	function updateVariantPriceDisplay(price, comparePrice) {
 		if (!currentProduct || price === null || price === undefined) return
 		const priceEl = document.getElementById('product-price')
+		const oldPriceEl = document.getElementById('product-old-price')
+		const discountEl = document.getElementById('product-discount')
 		const stickyPrice = document.getElementById('sticky-price')
 		const currency = currentProduct.currency || '€'
+		const selectedCompare = selectedVariant?.compare_at_price
+		const resolvedCompare =
+			comparePrice && String(comparePrice).trim() !== ''
+				? comparePrice
+				: selectedCompare && String(selectedCompare).trim() !== ''
+					? selectedCompare
+					: currentProduct.old_price
+		const numericPrice = parseFloat(price)
+		const numericOldPrice = parseFloat(resolvedCompare)
+		const hasDiscount =
+			!Number.isNaN(numericOldPrice) &&
+			!Number.isNaN(numericPrice) &&
+			numericOldPrice > numericPrice
 		if (priceEl) priceEl.textContent = `${currency}${price}`
 		if (stickyPrice) stickyPrice.textContent = `${currency}${price}`
+		if (oldPriceEl && discountEl) {
+			if (hasDiscount) {
+				oldPriceEl.textContent = `${currency}${resolvedCompare}`
+				oldPriceEl.classList.remove('hidden')
+				const discount = Math.round(
+					(1 - numericPrice / numericOldPrice) * 100,
+				)
+				discountEl.textContent = `-${discount}%`
+				discountEl.classList.remove('hidden')
+			} else {
+				oldPriceEl.classList.add('hidden')
+				discountEl.classList.add('hidden')
+			}
+		}
 	}
 
 	function updateAddToCartButtonVariant(variant) {
@@ -468,6 +498,7 @@
 						data-variant-id="${v.id}"
 						data-variant-title="${v.title}"
 						data-variant-price="${v.price || product.price}"
+						data-variant-compare="${v.compare_at_price || ''}"
 						data-image-index="${v.image_index || 0}"
 						${!v.available ? 'disabled title="Out of stock"' : ''}
 						onclick="selectColorVariant(this)"
@@ -505,6 +536,7 @@
 						class="variant-size-btn px-4 py-2 border ${i === 0 ? 'border-purple-500 bg-purple-500/10 text-white' : 'border-white/20 text-white/60'} ${!v.available ? 'opacity-30 cursor-not-allowed line-through' : 'hover:border-white/40'} rounded-lg text-sm transition-all"
 						data-variant-id="${v.id}"
 						data-variant-price="${v.price || product.price}"
+						data-variant-compare="${v.compare_at_price || ''}"
 						${!v.available ? 'disabled' : ''}
 						onclick="selectSizeVariant(this)"
 					>
@@ -517,7 +549,10 @@
 				if (sizeVariants[0]) {
 					selectedVariant = sizeVariants[0]
 					updateAddToCartButtonVariant(selectedVariant)
-					updateVariantPriceDisplay(selectedVariant.price)
+					updateVariantPriceDisplay(
+						selectedVariant.price,
+						selectedVariant.compare_at_price,
+					)
 				}
 			}
 		}
@@ -823,10 +858,12 @@
 		const selectedName = document.getElementById('selected-color-name')
 		if (selectedName) selectedName.textContent = btn.dataset.variantTitle
 
-		// Update price if variant has different price
-		if (btn.dataset.variantPrice && currentProduct) {
-			updateVariantPriceDisplay(btn.dataset.variantPrice)
-		}
+		const matchedVariant = currentProduct?.variants?.find(
+			v => String(v.id) === String(btn.dataset.variantId),
+		)
+		const resolvedPrice = matchedVariant?.price ?? btn.dataset.variantPrice
+		const resolvedCompare =
+			matchedVariant?.compare_at_price ?? btn.dataset.variantCompare
 
 		// Change main image
 		const imageIndex = parseInt(btn.dataset.imageIndex) || 0
@@ -837,9 +874,15 @@
 		selectedVariant = {
 			id: btn.dataset.variantId,
 			title: btn.dataset.variantTitle,
-			price: btn.dataset.variantPrice,
+			price: resolvedPrice,
+			compare_at_price: resolvedCompare,
 		}
 		updateAddToCartButtonVariant(selectedVariant)
+
+		// Update price if variant has different price
+		if (resolvedPrice && currentProduct) {
+			updateVariantPriceDisplay(resolvedPrice, resolvedCompare)
+		}
 	}
 
 	window.selectSizeVariant = function (btn) {
@@ -857,17 +900,25 @@
 		btn.classList.add('border-purple-500', 'bg-purple-500/10', 'text-white')
 		btn.classList.remove('border-white/20', 'text-white/60')
 
-		// Update price if variant has different price
-		if (btn.dataset.variantPrice && currentProduct) {
-			updateVariantPriceDisplay(btn.dataset.variantPrice)
-		}
+		const matchedVariant = currentProduct?.variants?.find(
+			v => String(v.id) === String(btn.dataset.variantId),
+		)
+		const resolvedPrice = matchedVariant?.price ?? btn.dataset.variantPrice
+		const resolvedCompare =
+			matchedVariant?.compare_at_price ?? btn.dataset.variantCompare
 
 		selectedVariant = {
 			...selectedVariant,
 			id: btn.dataset.variantId,
-			price: btn.dataset.variantPrice,
+			price: resolvedPrice,
+			compare_at_price: resolvedCompare,
 		}
 		updateAddToCartButtonVariant(selectedVariant)
+
+		// Update price if variant has different price
+		if (resolvedPrice && currentProduct) {
+			updateVariantPriceDisplay(resolvedPrice, resolvedCompare)
+		}
 	}
 
 	// Tab switching
@@ -904,6 +955,7 @@
 			lightbox.classList.remove('hidden')
 			lightbox.classList.add('flex')
 			document.body.style.overflow = 'hidden'
+			document.body.classList.add('lightbox-open')
 
 			// Sync with main swiper position
 			if (productLightboxSwiper && productMainSwiper) {
@@ -918,6 +970,7 @@
 			lightbox.classList.add('hidden')
 			lightbox.classList.remove('flex')
 			document.body.style.overflow = ''
+			document.body.classList.remove('lightbox-open')
 		}
 	}
 

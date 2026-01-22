@@ -231,6 +231,12 @@ body {
 	font-family: 'Inter', sans-serif;
 	margin: 0;
 }
+body.viewer-open .site-nav,
+body.viewer-open #mobile-menu,
+body.lightbox-open .site-nav,
+body.lightbox-open #mobile-menu {
+	display: none;
+}
 
 /* ensure images never overflow their container on small screens */
 img {
@@ -1087,6 +1093,7 @@ img {
 /* --- Viewer / sheet --- */
 #global-viewer {
 	background: rgba(0, 0, 0, 0.72);
+	z-index: 1300;
 }
 #viewer-media-wrapper {
 	display: inline-block;
@@ -1646,6 +1653,7 @@ img {
 /* Product lightbox */
 #product-lightbox {
 	animation: fadeIn 0.3s ease-out;
+	z-index: 1300;
 }
 
 /* Mobile sticky cart bar */

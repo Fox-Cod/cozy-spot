@@ -1298,6 +1298,7 @@ function openRoomViewer(roomId) {
 		}
 	}
 	document.body.style.overflow = 'hidden'
+	document.body.classList.add('viewer-open')
 	showViewerRoom(room, { suppress: true })
 	viewerKeyHandler = e => {
 		if (e.key === 'ArrowRight') nextViewerRoom()
@@ -1358,6 +1359,7 @@ function closeViewer() {
 	}
 	applyViewerScale(1)
 	document.body.style.overflow = 'auto'
+	document.body.classList.remove('viewer-open')
 	closeSheet()
 	const hotspotsContainer = document.getElementById('hotspots-container')
 	if (hotspotsContainer) {

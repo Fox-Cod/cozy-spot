@@ -1,0 +1,12 @@
+{
+	"sections": {
+		"main": {
+			"type": "faq",
+			"settings": {
+				"heading": "F.A.Q",
+				"subheading": "Answers to the most common questions."
+			}
+		}
+	},
+	"order": ["main"]
+}
