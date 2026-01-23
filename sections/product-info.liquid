@@ -291,18 +291,22 @@
 				</button>
 				<button
 					class="product-tab-btn pb-4 text-sm font-bold uppercase tracking-widest text-white/40 border-b-2 border-transparent hover:text-white/60 transition-all whitespace-nowrap"
+					data-tab="reviews"
+					onclick="switchProductTab('reviews')"
+				>
+					<span class="inline-flex items-center gap-2">
+						<svg class="w-4 h-4 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M12 2.75l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.77 6.2 20.62l1.11-6.47-4.7-4.58 6.49-.94L12 2.75z" />
+						</svg>
+						<span>Reviews</span>
+					</span>
+				</button>
+				<button
+					class="product-tab-btn pb-4 text-sm font-bold uppercase tracking-widest text-white/40 border-b-2 border-transparent hover:text-white/60 transition-all whitespace-nowrap"
 					data-tab="shipping"
 					onclick="switchProductTab('shipping')"
 				>
 					Shipping & Returns
-				</button>
-				{% assign reviews_count = product.metafields.judgeme.badge | split: "data-number-of-reviews='" | last | split: "'" | first %}
-				<button
-					class="product-tab-btn pb-4 text-sm font-bold uppercase tracking-widest text-white/40 border-b-2 border-transparent hover:text-white/60 transition-all whitespace-nowrap"
-					data-tab="reviews"
-					onclick="switchProductTab('reviews')"
-				>
-					Reviews <span id="tab-reviews-count" class="text-purple-400">({{ reviews_count | default: 0 }})</span>
 				</button>
 			</nav>
 		</div>
@@ -459,7 +463,7 @@
 	<div class="flex items-center justify-between gap-4">
 		<div class="flex-1 min-w-0">
 			<div id="sticky-price" class="text-lg font-bold font-mono">$0</div>
-			<div id="sticky-title" class="text-xs text-white/50 truncate">Product Name</div>
+			<div id="sticky-title" class="text-xs text-white/50 truncate">{{ product.title }}</div>
 		</div>
 		<button
 			id="sticky-add-to-cart-btn"

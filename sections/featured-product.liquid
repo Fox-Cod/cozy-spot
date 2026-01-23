@@ -5,10 +5,7 @@
 		</div>
 	</div>
 
-	{% assign product = section.settings.product %}
-	{% if product == blank %}
-		{% assign product = collections.all.products.first %}
-	{% endif %}
+	{% assign product = all_products['wireless-bluetooth-speaker'] %}
 	{% if product != blank %}
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 			<a href="{{ product.url }}" class="block group">
