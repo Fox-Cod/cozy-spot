@@ -31,11 +31,11 @@
 						</p>
 						<div class="flex gap-8 pt-4">
 							<div>
-								<div class="text-4xl font-black text-purple-500">50+</div>
+								<div class="text-4xl font-black text-purple-500">9+</div>
 								<div class="text-[10px] uppercase tracking-widest text-white/40 mt-1">Products</div>
 							</div>
 							<div>
-								<div class="text-4xl font-black text-purple-500">10K+</div>
+								<div class="text-4xl font-black text-purple-500">7K+</div>
 								<div class="text-[10px] uppercase tracking-widest text-white/40 mt-1">Happy Creators</div>
 							</div>
 							<div>
@@ -127,13 +127,13 @@
 						<p class="text-white/60 mb-8 max-w-lg mx-auto">Browse our curated collections and find the perfect pieces for your dream workspace.</p>
 						<div class="flex flex-col sm:flex-row gap-4 justify-center">
 							<a
-								href="collections.html"
+								href="{{ routes.collections_url }}"
 								class="px-8 py-4 bg-white text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-purple-500 hover:text-white transition-all duration-300"
 							>
 								Shop Collections
 							</a>
 							<a
-								href="showcase.html"
+								href="{{ pages['showcase'].url | default: '/pages/showcase' }}"
 								class="px-8 py-4 border border-white/20 font-black uppercase text-xs tracking-widest rounded-xl hover:border-white hover:bg-white/5 transition-all duration-300"
 							>
 								View Showcase
