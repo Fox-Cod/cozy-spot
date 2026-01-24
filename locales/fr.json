@@ -1,0 +1,113 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "customer_accounts": {
+    "account_menu": {
+      "aria_labels": {
+        "close_menu": "Fermer le menu",
+        "back_to_main_menu": "Retour au menu principal depuis {{title}}",
+        "open_submenu": "{{title}} , ouvre le sous-menu",
+        "loading_menu": "Chargement du menu",
+        "account": "Compte",
+        "sign_in_with_email": "Se connecter avec un e-mail",
+        "sign_in": "Se connecter"
+      }
+    },
+    "B2B": {
+      "draft_order_details": {
+        "payment_status": {
+          "pending": {
+            "description_due_on_fulfillment_partially_paid_next": "Cette commande a été partiellement payée. Il vous reste un solde à régler."
+          }
+        }
+      }
+    },
+    "errors": {
+      "not_upgraded": "Les comptes clients ne sont pas mis à niveau.",
+      "failed_to_revert": "Impossible de rétablir les paramètres du compte client.",
+      "revert_window_expired": "La période de restauration a expiré."
+    },
+    "payment_methods": {
+      "add_payment_method": {
+        "subscription_contracts": {
+          "title": "Utilisez ce mode de paiement pour les commandes récurrentes",
+          "more_items": {
+            "one": "{{count}} produit supplémentaire",
+            "other": "{{count}} autres produits"
+          },
+          "product_count": {
+            "one": "{{count}} produit",
+            "other": "{{count}} produits"
+          },
+          "product_details": "Détails du produit",
+          "load_more": "Charger plus"
+        },
+        "updating_contracts": {
+          "one": "Mise à jour du contrat d'abonnement {{count}} ...",
+          "other": "Mise à jour de {{count}} contrats d'abonnement..."
+        },
+        "contracts_updated": {
+          "one": "Contrat d'abonnement {{count}} mis à jour avec succès",
+          "other": "{{count}} contrats d'abonnement mis à jour avec succès"
+        },
+        "contracts_update_failed": "Échec de la mise à jour de certains contrats d'abonnement",
+        "subscription_contracts_updated": "Mise à jour de {{succeeded}} sur {{total}} abonnements",
+        "invalid_wallet_type_error": "Type de portefeuille invalide."
+      }
+    }
+  },
+  "404": {
+    "not_found": "Page introuvable.",
+    "back_to_shopping": "Retour aux achats"
+  },
+  "blog": {
+    "article_comments": "Commentaires",
+    "comment_form_body": "Commentaire",
+    "comment_form_email": "E-mail",
+    "comment_form_name": "Nom",
+    "comment_form_submit": "Poste",
+    "comment_form_title": "Ajouter un commentaire"
+  },
+  "cart": {
+    "checkout": "Vérifier",
+    "title": "Chariot",
+    "update": "Mise à jour",
+    "remove": "Retirer"
+  },
+  "customers": {
+    "login": {
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "title": "Se connecter"
+    }
+  },
+  "collections": {
+    "title": "Collections "
+  },
+  "gift_card": {
+    "add_to_apple_wallet": "Ajouter à Apple Wallet",
+    "card": "carte-cadeau",
+    "expired": "Cette carte-cadeau a expiré.",
+    "expires_on": "Expire le {{ expires_on }}",
+    "use_at_checkout": "Utilisez cette carte-cadeau lors du paiement."
+  },
+  "password": {
+    "title": "Cette boutique est privée",
+    "password": "Mot de passe",
+    "enter": "Entrer"
+  },
+  "search": {
+    "title": "Recherche",
+    "placeholder": "Rechercher des articles, des pages ou des produits",
+    "submit": "Recherche",
+    "no_results_html": "Aucun résultat trouvé pour {{ terms }}"
+  }
+}
