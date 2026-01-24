@@ -3,13 +3,7 @@
 		"main": {
 			"type": "index",
 			"settings": {}
-		},
-		"featured_product": {
-			"type": "featured-product",
-			"settings": {
-				"product": "cloud-neon-led-wall-night-light"
-			}
 		}
 	},
-	"order": ["main", "featured_product"]
+	"order": ["main"]
 }

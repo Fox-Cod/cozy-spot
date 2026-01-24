@@ -2720,9 +2720,351 @@ function triggerCartAttention() {
 	}, 700)
 }
 
-// Cart badge pulse
 function pulseBadge() {
 	triggerCartAttention()
 }
+;(function initFeedbackUniverse() {
+	const init = () => {
+		const universe = document.getElementById('feedback-universe')
+		if (!universe) return
 
-// CartDrawer.init() runs automatically when cart drawer exists on the page
+		const reviews = [
+			{
+				text: 'The glow feels like a quiet moon trapped behind glass.',
+				author: 'Elena',
+				product: 'Ambient Halo Lamp',
+				rating: 5,
+			},
+			{
+				text: 'The neon line bends the room like soft rubber.',
+				author: 'Marcus',
+				product: 'Cloud Neon Light',
+				rating: 5,
+			},
+			{
+				text: 'Cables vanished; it feels like the desk is hovering.',
+				author: 'Jun',
+				product: 'Magnetic Cable Kit',
+				rating: 4,
+			},
+			{
+				text: 'The screen floats like it found its own gravity.',
+				author: 'Iris',
+				product: 'Monitor Riser',
+				rating: 5,
+			},
+			{
+				text: 'A soft rain of pixels across the night.',
+				author: 'Noah',
+				product: 'Pixel Display',
+				rating: 5,
+			},
+			{
+				text: 'Everything looks curated by a dream architect.',
+				author: 'Maya',
+				product: 'Desk Organizer Grid',
+				rating: 5,
+			},
+			{
+				text: 'The shadows are softer, like a studio set.',
+				author: 'Theo',
+				product: 'Softbox Light Bar',
+				rating: 4,
+			},
+			{
+				text: 'The shelf makes the wall feel taller than it is.',
+				author: 'Sofia',
+				product: 'Pegboard Shelf',
+				rating: 5,
+			},
+			{
+				text: 'It’s like the desk learned how to breathe.',
+				author: 'Arman',
+				product: 'Airflow Dock',
+				rating: 4,
+			},
+			{
+				text: 'The room feels wider, like a lens opened.',
+				author: 'Claire',
+				product: 'Wall Wash Light',
+				rating: 5,
+			},
+			{
+				text: 'Clean lines, quiet light, zero clutter.',
+				author: 'Omar',
+				product: 'Minimal Tray',
+				rating: 4,
+			},
+			{
+				text: 'Feels like a tiny gallery built for focus.',
+				author: 'Lina',
+				product: 'Desk Gallery Frame',
+				rating: 5,
+			},
+		]
+
+		const cardsHtml = reviews
+			.map(
+				(r, i) => `
+					<div class="feedback-card" data-index="${i}">
+						<div class="feedback-card__header">
+							<span>${r.product}</span>
+							<span class="feedback-card__stars">${'★'.repeat(r.rating || 5)}</span>
+						</div>
+						<p class="feedback-card__text">${r.text}</p>
+						<div class="feedback-card__author">— ${r.author}</div>
+					</div>
+				`,
+			)
+			.join('')
+
+		universe.innerHTML = cardsHtml
+
+		const cards = Array.from(universe.querySelectorAll('.feedback-card'))
+		let offset = { x: 0, y: 0 }
+		let targetOffset = { x: 0, y: 0 }
+		let angleY = 0
+		let angleX = 0
+
+		const updateTarget = (clientX, clientY) => {
+			const rect = universe.getBoundingClientRect()
+			const x = ((clientX - rect.left) / rect.width) * 2 - 1
+			const y = ((clientY - rect.top) / rect.height) * 2 - 1
+			targetOffset = { x: x * 20, y: y * 15 }
+		}
+
+		universe.addEventListener('mousemove', e =>
+			updateTarget(e.clientX, e.clientY),
+		)
+		universe.addEventListener(
+			'mouseleave',
+			() => (targetOffset = { x: 0, y: 0 }),
+		)
+		universe.addEventListener(
+			'touchmove',
+			e => {
+				if (!e.touches[0]) return
+				updateTarget(e.touches[0].clientX, e.touches[0].clientY)
+			},
+			{ passive: true },
+		)
+
+		cards.forEach(card => {
+			card.addEventListener(
+				'mouseenter',
+				() => (card.dataset.hover = '1'),
+			)
+			card.addEventListener(
+				'mouseleave',
+				() => (card.dataset.hover = '0'),
+			)
+		})
+
+		const goldenAngle = Math.PI * (3 - Math.sqrt(5))
+		const spherePoints = cards.map((_, i) => {
+			const y = 1 - (i / (cards.length - 1)) * 2
+			const radius = Math.sqrt(1 - y * y)
+			const theta = goldenAngle * i
+			return {
+				x: Math.cos(theta) * radius,
+				y: y,
+				z: Math.sin(theta) * radius,
+			}
+		})
+
+		const animate = () => {
+			const rect = universe.getBoundingClientRect()
+			const centerX = rect.width / 2
+			const centerY = rect.height / 2
+			const sphereRadius = Math.min(rect.width, rect.height) * 0.38
+
+			offset.x += (targetOffset.x - offset.x) * 0.05
+			offset.y += (targetOffset.y - offset.y) * 0.05
+			angleY += 0.003
+			angleX += 0.0014
+
+			cards.forEach((card, i) => {
+				const point = spherePoints[i]
+
+				const cosY = Math.cos(angleY)
+				const sinY = Math.sin(angleY)
+				const x1 = point.x * cosY - point.z * sinY
+				const z1 = point.x * sinY + point.z * cosY
+				const y1 = point.y
+
+				const cosX = Math.cos(angleX)
+				const sinX = Math.sin(angleX)
+				const y2 = y1 * cosX - z1 * sinX
+				const z2 = y1 * sinX + z1 * cosX
+
+				const perspective = 600
+				const depth = z2
+				const fov =
+					perspective / (perspective + depth * sphereRadius * 0.5)
+
+				const screenX = centerX + x1 * sphereRadius * fov + offset.x
+				const screenY = centerY + y2 * sphereRadius * fov + offset.y
+
+				const normalizedDepth = (depth + 1) / 2
+				let scale = 0.5 + normalizedDepth * 0.6
+				let opacity = 0.3 + normalizedDepth * 0.7
+
+				if (card.dataset.hover === '1') {
+					scale += 0.15
+					opacity = 1
+				}
+
+				card.style.left = `${screenX}px`
+				card.style.top = `${screenY}px`
+				card.style.transform = `translate(-50%, -50%) scale(${scale})`
+				card.style.zIndex = Math.round(normalizedDepth * 20)
+				card.style.opacity = opacity
+				card.style.filter = `blur(${(1 - normalizedDepth) * 1.5}px)`
+			})
+
+			requestAnimationFrame(animate)
+		}
+
+		requestAnimationFrame(animate)
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init)
+	} else {
+		init()
+	}
+})()
+;(function rotateFeaturedProducts() {
+	const init = () => {
+		const dataEl = document.getElementById('featured-products-data')
+		if (!dataEl) return
+
+		let products
+		try {
+			products = JSON.parse(dataEl.textContent || '[]')
+		} catch (err) {
+			return
+		}
+
+		if (!Array.isArray(products) || products.length < 2) return
+
+		const titleEl = document.getElementById('featured-product-title')
+		const descEl = document.getElementById('featured-product-description')
+		const priceEl = document.getElementById('featured-product-price')
+		const compareEl = document.getElementById('featured-product-compare')
+		const discountEl = document.getElementById('featured-product-discount')
+		const imageEl = document.getElementById('featured-product-image')
+		const linkEl = document.getElementById('featured-product-link')
+		const detailsEl = document.getElementById('featured-product-details')
+		const addEl = document.getElementById('featured-product-add')
+		const infoEl = document.getElementById('featured-product-info')
+		const ratingWrapEl = document.getElementById('featured-product-rating')
+		const ratingTemplatesEl = document.getElementById(
+			'featured-product-ratings',
+		)
+
+		if (
+			!titleEl ||
+			!descEl ||
+			!priceEl ||
+			!imageEl ||
+			!linkEl ||
+			!detailsEl
+		)
+			return
+
+		let index = 0
+		const update = item => {
+			if (!item) return
+			if (linkEl) linkEl.classList.add('opacity-0')
+			if (infoEl) infoEl.classList.add('opacity-0')
+			if (imageEl) imageEl.classList.add('opacity-0')
+
+			setTimeout(() => {
+				titleEl.textContent = item.title || ''
+				descEl.textContent = item.description || ''
+				priceEl.textContent = item.price || ''
+				imageEl.src = item.image || ''
+				imageEl.alt = item.title || ''
+				linkEl.href = item.url || '#'
+				detailsEl.href = item.url || '#'
+
+				if (compareEl && discountEl) {
+					const compareCents = Number(item.compareCents || 0)
+					const priceCents = Number(item.priceCents || 0)
+					if (compareCents > priceCents && priceCents > 0) {
+						compareEl.textContent = item.compare || ''
+						compareEl.classList.remove('hidden')
+						const percent = Math.round(
+							((compareCents - priceCents) / compareCents) * 100,
+						)
+						discountEl.textContent = `-${percent}%`
+						discountEl.classList.remove('hidden')
+					} else {
+						compareEl.textContent = ''
+						compareEl.classList.add('hidden')
+						discountEl.textContent = '-0%'
+						discountEl.classList.add('hidden')
+					}
+				}
+
+				if (addEl) {
+					addEl.dataset.handle = item.handle || ''
+					addEl.dataset.variantId = item.variantId || ''
+					addEl.dataset.title = item.title || ''
+					addEl.dataset.price = item.priceCents
+						? (item.priceCents / 100).toFixed(2)
+						: ''
+					addEl.dataset.image = item.image || ''
+				}
+
+				if (ratingWrapEl && ratingTemplatesEl) {
+					const safeHandle =
+						window.CSS && window.CSS.escape
+							? window.CSS.escape(item.handle || '')
+							: (item.handle || '').replace(/"/g, '\\"')
+					const ratingTemplate = ratingTemplatesEl.querySelector(
+						`[data-handle="${safeHandle}"]`,
+					)
+					ratingWrapEl.innerHTML = ratingTemplate
+						? ratingTemplate.innerHTML
+						: ''
+				}
+
+				const revealAll = () => {
+					if (imageEl) imageEl.classList.remove('opacity-0')
+					if (linkEl) {
+						linkEl.classList.remove('opacity-0')
+						linkEl.classList.remove('reveal-bottom')
+						void linkEl.offsetWidth
+						linkEl.classList.add('reveal-bottom')
+					}
+					if (infoEl) {
+						infoEl.classList.remove('opacity-0')
+						infoEl.classList.remove('reveal-right')
+						void infoEl.offsetWidth
+						infoEl.classList.add('reveal-right')
+					}
+				}
+
+				if (imageEl && !imageEl.complete) {
+					imageEl.onload = revealAll
+				} else {
+					revealAll()
+				}
+			}, 250)
+		}
+
+		update(products[index])
+		setInterval(() => {
+			index = (index + 1) % products.length
+			update(products[index])
+		}, 12000)
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init)
+	} else {
+		init()
+	}
+})()
