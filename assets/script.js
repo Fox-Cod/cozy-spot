@@ -2389,6 +2389,35 @@ const parsePriceValue = value => {
 	return numeric
 }
 
+const resolveCurrencyCode = input => {
+	const raw = (input || '').toString().trim().toUpperCase()
+	if (raw === '$') return 'USD'
+	if (raw === '€') return 'EUR'
+	if (raw.length === 3) return raw
+	const shopifyCurrency =
+		window?.Shopify?.currency?.active ||
+		window?.Shopify?.currency?.default ||
+		null
+	if (shopifyCurrency) return shopifyCurrency.toString().trim().toUpperCase()
+	return 'USD'
+}
+
+const normalizeContentId = id => {
+	if (!id) return null
+	const raw = id.toString()
+	if (raw.includes('gid://')) {
+		const parts = raw.split('/')
+		return parts[parts.length - 1]
+	}
+	return raw
+}
+
+const trackTikTokEvent = (eventName, payload) => {
+	if (window?.ttq && typeof window.ttq.track === 'function') {
+		window.ttq.track(eventName, payload)
+	}
+}
+
 async function fetchProductJsonByHandle(handle) {
 	if (!handle) return null
 	const primaryUrl = `${getProductUrl(handle)}.js`
@@ -2535,6 +2564,39 @@ async function addToCart(productInput) {
 	if (shopifyAdded) {
 		CartDrawer.refresh()
 		triggerCartAttention()
+
+		const currencyCode = resolveCurrencyCode(
+			product?.currency ||
+				product?.currencyCode ||
+				window?.Shopify?.currency?.active ||
+				window?.Shopify?.currency?.default,
+		)
+		const priceValue = parsePriceValue(localProduct.price) || 0
+		const totalValue = Number(
+			(priceValue * localProduct.quantity).toFixed(2),
+		)
+		const contentId =
+			normalizeContentId(localProduct.id || localProduct.variantId) ||
+			localProduct.handle ||
+			localProduct.title
+		const contents = [
+			{
+				content_id: contentId,
+				content_type: 'product_group',
+				content_name: localProduct.title,
+				price: priceValue,
+				quantity: localProduct.quantity,
+				currency: currencyCode,
+			},
+		]
+		trackTikTokEvent('AddToCart', {
+			content_type: 'product_group',
+			content_id: contentId,
+			content_name: localProduct.title,
+			contents,
+			currency: currencyCode,
+			value: totalValue,
+		})
 	}
 
 	return { ok: shopifyAdded, product: localProduct }

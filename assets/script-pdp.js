@@ -9,6 +9,83 @@
 	let productLightboxSwiper = null
 	let relatedProductsSwiper = null
 	let productScenesSwiper = null
+	let hasTrackedViewContent = false
+
+	const normalizeContentId = id => {
+		if (!id) return null
+		const raw = id.toString()
+		if (raw.includes('gid://')) {
+			const parts = raw.split('/')
+			return parts[parts.length - 1]
+		}
+		return raw
+	}
+
+	const resolveCurrencyCode = input => {
+		const raw = (input || '').toString().trim().toUpperCase()
+		if (raw === '$') return 'USD'
+		if (raw === '€') return 'EUR'
+		if (raw.length === 3) return raw
+		const shopifyCurrency =
+			window?.Shopify?.currency?.active ||
+			window?.Shopify?.currency?.default ||
+			null
+		if (shopifyCurrency)
+			return shopifyCurrency.toString().trim().toUpperCase()
+		return 'USD'
+	}
+
+	const resolvePriceValue = value => {
+		if (value === null || value === undefined) return null
+		const numeric = typeof value === 'string' ? parseFloat(value) : value
+		if (Number.isNaN(numeric)) return null
+		return numeric
+	}
+
+	const trackTikTokEvent = (eventName, payload) => {
+		if (window?.ttq && typeof window.ttq.track === 'function') {
+			window.ttq.track(eventName, payload)
+		}
+	}
+
+	const trackTikTokViewContent = () => {
+		if (hasTrackedViewContent || !currentProduct) return
+		const priceValue =
+			resolvePriceValue(selectedVariant?.price) ||
+			resolvePriceValue(currentProduct.price) ||
+			0
+		const currencyCode = resolveCurrencyCode(
+			currentProduct.currency ||
+				window?.Shopify?.currency?.active ||
+				window?.Shopify?.currency?.default,
+		)
+		const contentId =
+			normalizeContentId(currentProduct.id || selectedVariant?.id) ||
+			currentProduct.handle ||
+			currentProduct.title
+		const variantSuffix = selectedVariant?.title
+			? ` - ${selectedVariant.title}`
+			: ''
+		const contentName = `${currentProduct.title || 'Product'}${variantSuffix}`
+		const contents = [
+			{
+				content_id: contentId,
+				content_type: 'product_group',
+				content_name: contentName,
+				price: priceValue,
+				currency: currencyCode,
+			},
+		]
+		trackTikTokEvent('ViewContent', {
+			content_type: 'product_group',
+			content_id: contentId,
+			content_name: contentName,
+			contents,
+			currency: currencyCode,
+			value: Number(priceValue.toFixed(2)),
+		})
+		hasTrackedViewContent = true
+	}
 
 	// Get product handle from URL
 	function getProductHandleFromURL() {
@@ -34,6 +111,7 @@
 				initProductSwipers()
 				initMobileStickyBar()
 				updateSEOMeta(mapped)
+				trackTikTokViewContent()
 				console.log('[PDP] Product loaded from Liquid:', mapped)
 				return
 			}
@@ -363,6 +441,8 @@
 		const stickyTitle = document.getElementById('sticky-title')
 		if (stickyPrice) stickyPrice.textContent = `${currency}${product.price}`
 		if (stickyTitle) stickyTitle.textContent = product.title
+
+		trackTikTokViewContent()
 	}
 
 	function updateVariantPriceDisplay(price, comparePrice) {
